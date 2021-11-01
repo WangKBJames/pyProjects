@@ -4,6 +4,7 @@ from binReader import bin_reader
 from timeParser import time_parser, time_list
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
 from datetime import datetime
 
 a = r"G:\JSTI\数据分析组文件\江阴位移\wy202004\2020\04\13\WY070101_180000.WY"
@@ -22,3 +23,6 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
 ax.xaxis.set_major_formatter
 ax.plot(tl, y, 'r')
 plt.show()
+a=np.arange(10).astype(dtype='float')
+a = np.random.randn(3, 3)
+a.T
