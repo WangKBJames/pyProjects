@@ -1,6 +1,5 @@
 import datetime
 import glob
-
 from binReader import bin_reader
 from timeParser import time_parser, time_list
 
