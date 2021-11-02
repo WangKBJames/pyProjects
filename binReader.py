@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import struct
 
+
 def bin_reader(file_path):
     try:
         f = open(file_path, 'rb')
@@ -61,8 +62,8 @@ def bin_reader(file_path):
     except BaseException:
         return list()
 
-
-len1 = bin_reader(r"E:\RecycleBin~1cdd.ffs_tmp\data\新建文件夹\南京三桥数据201801\WD\温度\2018\01\22\WD010101_200009.WD")
-# len1 = bin_reader(r"I:\JSTI\数据分析组文件\江阴2021中铁桥隧升级改造样本\数据\数据\原始数据\data\WD\2021\09\01\WD060201_210000.WD")
-# len1 = bin_reader(r"E:\RecycleBin~1cdd.ffs_tmp\data\新建文件夹\南京三桥数据201801\WD\温度\2018\01\30\WD010101_150041.WD")
-print(len1)
+#
+# len1 = bin_reader(r"E:\RecycleBin~1cdd.ffs_tmp\data\新建文件夹\南京三桥数据201801\WD\温度\2018\01\22\WD010101_200009.WD")
+# # len1 = bin_reader(r"I:\JSTI\数据分析组文件\江阴2021中铁桥隧升级改造样本\数据\数据\原始数据\data\WD\2021\09\01\WD060201_210000.WD")
+# # len1 = bin_reader(r"E:\RecycleBin~1cdd.ffs_tmp\data\新建文件夹\南京三桥数据201801\WD\温度\2018\01\30\WD010101_150041.WD")
+# print(len1)

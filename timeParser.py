@@ -9,11 +9,11 @@ def time_list(start_t, len_t, sample_frq):
     return tl
 
 
-def time_parser(path_str):
+def time_parser(file_path):
     # time_str: 时间字符串，例如：
     # “I:\JSTI\数据分析组文件\江阴2021中铁桥隧升级改造样本\数据\数据\原始数据\data\WD\2021\09\01\WD060201_210000.WD”
     # a = r"I:\JSTI\数据分析组文件\江阴2021中铁桥隧升级改造样本\数据\数据\原始数据\data\WD\2021\09\01\WD060201_210000.WD"
-    match_obj = re.match(r'.*\\(\d{4})\\(\d{2})\\(\d{2})\\.*_(\d{6})\..*', path_str, re.M | re.I)
+    match_obj = re.match(r'.*\\(\d{4})\\(\d{2})\\(\d{2})\\.*_(\d{6})\..*', file_path, re.M | re.I)
     year = match_obj.group(1)
     month = match_obj.group(2)
     day = match_obj.group(3)
@@ -23,7 +23,6 @@ def time_parser(path_str):
     dt = year+"-"+month+"-"+day+" "+HH+":"+MM+":"+SS
     return datetime.datetime.strptime(dt, '%Y-%m-%d %H:%M:%S')
     # print(datetime.strptime(dt, '%Y-%m-%d %H:%M:%S'))
-
 
 
 
