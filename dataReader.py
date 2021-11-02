@@ -57,11 +57,4 @@ def data_location(main_path, sensor_num, t):
     for i in str_list:
         data_folder = data_folder + i
     file_list = glob.glob(data_folder)
-
-    # if len(t) > 4:
-    #     mm_str = '%02d' % t[4]
-    # if len(t) > 5:
-    #     ss_str = '%02d' % t[5]
     return file_list
-
-    # file_list = os.listdir()
