@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import struct
 
-
 def bin_reader(file_path):
     try:
         f = open(file_path, 'rb')
