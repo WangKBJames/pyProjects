@@ -28,12 +28,15 @@ def data_reader(main_path, sensor_num, t_start_list, t_end_list, sample_frq):
             t_list = []
             for i in range(t_start.hour, t_end.hour + 1):
                 ti = t_start.replace(hour=i)
-                file_list = data_location(main_path, sensor_num, ti)
+                t = [ti.year, ti.month, ti.day, ti.hour]
+                file_list = data_location(main_path, sensor_num, t)
                 data_i = bin_reader(file_list[0])
                 if len(data_i) > 0:
                     data.extend(data_i)
                     t_datetime = time_parser(file_list[0])
-                    t_list_i = time_list(t_datetime, len(data), sample_frq)
+                    # print(t_datetime)
+                    t_list_i = time_list(t_datetime, len(data_i), sample_frq)
+                    # print(len(data))
                     t_list.extend(t_list_i)
     else:
         pass
