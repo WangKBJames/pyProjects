@@ -9,9 +9,9 @@ def data_reader(main_path, sensor_num, t_start_list, t_end_list, sample_frq):
     t_start = datetime.datetime(*t_start_list)
     t_end = datetime.datetime(*t_end_list)
     t_delta = t_end - t_start
-    s_delta = t_delta.seconds
-    data = []
+    s_delta = t_end.timestamp()-t_start.timestamp()
     t_list = []
+    data = []
     if s_delta < 0:
         print('=======> 查询结速时间早于开始时间，查询异常！')
         return t_list, data
@@ -70,32 +70,32 @@ def data_reader(main_path, sensor_num, t_start_list, t_end_list, sample_frq):
                 else:
                     day_start_num = int(1)
                     day_end_num = calendar.monthrange(i, j)[1]
-                    for k in range(day_start_num, day_end_num + 1):
-                        if (k == t_start.day) & (j == t_start.month) & (i == t_start.year):
-                            h_start_num = t_start.hour
-                            h_end_num = int(23)
-                        elif (k == t_end.day) & (j == t_end.month) & (i == t_end.year):
-                            h_start_num = int(0)
-                            h_end_num = t_end.hour
-                        else:
-                            h_start_num = int(0)
-                            h_end_num = int(23)
-                        if (h_start_num == 0) & (h_end_num == 23):
-                            t = [i, j, k]
-                            file_list = data_location(main_path, sensor_num, t)
-                        else:
-                            file_list = []
-                            for h in range(h_start_num, h_end_num + 1):
-                                t = [i, j, k, h]
-                                file_list.extend(data_location(main_path, sensor_num, t))
-                        if len(file_list) > 0:
-                            for file_str in file_list:
-                                data_i = bin_reader(file_str)
-                                if len(data_i) > 0:
-                                    data.extend(data_i)
-                                    t_datetime = time_parser(file_list[0])
-                                    t_list_i = time_list(t_datetime, len(data_i), sample_frq)
-                                    t_list.extend(t_list_i)
+                for k in range(day_start_num, day_end_num + 1):
+                    if (k == t_start.day) & (j == t_start.month) & (i == t_start.year):
+                        h_start_num = t_start.hour
+                        h_end_num = int(23)
+                    elif (k == t_end.day) & (j == t_end.month) & (i == t_end.year):
+                        h_start_num = int(0)
+                        h_end_num = t_end.hour
+                    else:
+                        h_start_num = int(0)
+                        h_end_num = int(23)
+                    if (h_start_num == 0) & (h_end_num == 23):
+                        t = [i, j, k]
+                        file_list = data_location(main_path, sensor_num, t)
+                    else:
+                        file_list = []
+                        for h in range(h_start_num, h_end_num + 1):
+                            t = [i, j, k, h]
+                            file_list.extend(data_location(main_path, sensor_num, t))
+                    if len(file_list) > 0:
+                        for file_str in file_list:
+                            data_i = bin_reader(file_str)
+                            if len(data_i) > 0:
+                                data.extend(data_i)
+                                t_datetime = time_parser(file_list[0])
+                                t_list_i = time_list(t_datetime, len(data_i), sample_frq)
+                                t_list.extend(t_list_i)
 
     return t_list, data
 
