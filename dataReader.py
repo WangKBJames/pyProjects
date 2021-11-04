@@ -93,7 +93,7 @@ def data_reader(main_path, sensor_num, t_start_list, t_end_list, sample_frq):
                             data_i = bin_reader(file_str)
                             if len(data_i) > 0:
                                 data.extend(data_i)
-                                t_datetime = time_parser(file_list[0])
+                                t_datetime = time_parser(file_str)
                                 t_list_i = time_list(t_datetime, len(data_i), sample_frq)
                                 t_list.extend(t_list_i)
 
