@@ -1,4 +1,4 @@
-from dataReader import data_reader, data_location
+from dataReader import bin_data, data_location
 import time
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -13,9 +13,9 @@ main_path = r"G:\JSTI\数据分析组文件\徐州和平桥\和平桥数据\data
 sensor_num = "LW010101"
 sample_frq = 1
 t_start_list = [2019, 9, 20, 12, 25, 0]
-t_end_list = [2020, 5, 20, 13, 10, 0]
+t_end_list = [2019, 10, 23, 13, 10, 0]
 t1 = time.time()
-t_list, data = data_reader(main_path, sensor_num, t_start_list, t_end_list, sample_frq)
+t_list, data = bin_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq)
 t2 = time.time()
 dt = t2 - t1
 print(len(data) / 3600 / 24)
@@ -34,3 +34,4 @@ plt.xticks(rotation=90)
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
 ax.plot(t_list, data, 'r')
 plt.show()
+
