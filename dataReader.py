@@ -94,7 +94,7 @@ def bin_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq):
                             data_i = bin_reader(file_str)
                             if len(data_i) > 0:
                                 if len(data_i) > sample_frq * 3600:
-                                    data_i = data_i[sample_frq * 3600:-1]
+                                    data_i = data_i[0:sample_frq * 3600]
                                 elif len(data_i) < sample_frq * 3600:
                                     data_i.extend(np.full(int(sample_frq * 3600 - len(data_i)), np.nan))
                                     # print(data_i[-1])
@@ -106,7 +106,7 @@ def bin_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq):
     return t_list, data
 
 
-def gnss_data(main_path, sensor_num, t_start_list, t_end_list, scale=100, return_ref=[0, 1, 2]):
+def gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1):
     t_start = datetime.datetime(*t_start_list)
     t_end = datetime.datetime(*t_end_list)
     s_delta = t_end.timestamp() - t_start.timestamp()
@@ -191,16 +191,19 @@ def gnss_data(main_path, sensor_num, t_start_list, t_end_list, scale=100, return
                         for file_str in file_list:
                             t_list_i, *data_i = gnss_reader(file_list[0], return_ref)
                             t_list.extend(t_list_i)
-                            if len(data_i) > 0:
-                                if len(data_i) > sample_frq * 3600:
-                                    data_i = data_i[sample_frq * 3600:-1]
-                                elif len(data_i) < sample_frq * 3600:
-                                    data_i.extend(np.full(int(sample_frq * 3600 - len(data_i)), np.nan))
+                            if len(data_i[0]) > 0:
+                                if len(data_i[0]) > sample_frq * 3600:
+                                    for ind in range(len(data_i)):
+                                        data_i[ind] = data_i[ind][0:sample_frq * 3600]
+                                elif len(data_i[0]) < sample_frq * 3600:
+                                    for ind in range(len(data_i)):
+                                        data_i[ind].extend(np.full(int(sample_frq * 3600 - len(data_i[ind])), np.nan))
                                     # print(data_i[-1])
-                            data.extend(data_i)
-                            t_datetime = time_parser(file_str)
-                            t_list_i = time_list(t_datetime, len(data_i), sample_frq)
-                            t_list.extend(t_list_i)
+                            if data:
+                                for ind in range(len(data)):
+                                    data[ind].extend(data_i[ind])
+                            else:
+                                data = data_i
 
     return t_list, data
 
