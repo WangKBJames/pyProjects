@@ -223,3 +223,7 @@ def data_location(main_path, sensor_num, t):
         data_folder = data_folder + i
     file_list = glob.glob(data_folder)
     return file_list
+
+
+if __name__ == __main__:
+    pass
