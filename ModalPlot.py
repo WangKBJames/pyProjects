@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure(figsize=(9, 3),dpi=80) #设置图标的大小
 # ax = fig.add_subplot(111, projection='3d',) # 111的意思是把画布分为1行1列，画在第一个方格内。其实就是整个画布。
 ax = fig.add_subplot(111, figsize=(8, 2.5))
-
+fig.add_subplot()
 # 创建样本，注意两个特征不能线性相关，否则无法用最小二乘解参数
 X1 = np.arange(-4, 4, 0.1)
 m = len(X1)
@@ -37,7 +37,6 @@ ax.plot_surface(M, N, Z)
 ax.plot_surface
 # scatter是散点图
 ax.scatter(X1, X2, Y, c='r')
-fig.(figsize=(8, 4), dpi=40)
 # fig.set_figwidth(10)
 # 设置坐标轴的名称
 ax.set_xlabel('X')
