@@ -5,13 +5,13 @@ from mpl_toolkits.mplot3d import Axes3D
 
 # 三维，两个特征
 fig = plt.figure(figsize=(9, 3), dpi=80)  # 设置图标的大小
-ax = fig.add_subplot(111, projection='3d',) # 111的意思是把画布分为1行1列，画在第一个方格内。其实就是整个画布。
+ax = fig.add_subplot(111, projection='3d') # 111的意思是把画布分为1行1列，画在第一个方格内。其实就是整个画布。
 box = ax.get_position()
 ax.set_position(
     [0.05, 0.05, 0.85, 0.85])
 ax.set_position(
-    [box.x0, box.y0, box.width * 0.9, box.height])  # 若是将图例画在坐标外边，如果放在右边，一般要给width*0.8左右的值，在上边，要给height*0.8左右的值
-
+    [box.x0, box.y0, box.width * 0.8, box.height*0.8])  # 若是将图例画在坐标外边，如果放在右边，一般要给width*0.8左右的值，在上边，要给height*0.8左右的值
+ax.set_xticklabels
 plt.legend(loc='lower right', fontsize=12, frameon=True, fancybox=True, framealpha=0.2, borderpad=0.3,
            ncol=1, markerfirst=True, markerscale=1, numpoints=1, handlelength=3.5)
 

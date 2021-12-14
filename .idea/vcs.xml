@@ -2,6 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/StochasticSubspaceIdentification" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cobem2019-modal-analysis-python" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tods" vcs="Git" />
   </component>
 </project>
