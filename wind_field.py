@@ -22,7 +22,7 @@ def movmean(y_signal, win_n):
         if i < int(win_n // 2):
             y_mean = np.append(y_mean, np.mean(y_signal[:i + int(math.ceil(int(win_n) / 2))]))
         elif i >= len(y_signal) - int(math.floor(win_n / 2)):
-            y_mean = np.append(y_mean, np.mean(y_signal[i- int(math.ceil(win_n / 2)) + 1:]))
+            y_mean = np.append(y_mean, np.mean(y_signal[i- int(math.ceil(win_n / 2)) :]))
         else:
             y_mean = np.append(y_mean, np.mean(y_signal[i - math.floor(win_n / 2):i + int(math.ceil(win_n / 2))]))
     return y_mean.tolist()
