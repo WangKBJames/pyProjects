@@ -11,6 +11,12 @@ from scipy.stats import pearsonr
 
 
 def spectrum(y_signal, fs):
+    """
+
+    :param y_signal:
+    :param fs:
+    :return:
+    """
     if type(y_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
     fft_y = np.fft.rfft(y_signal)
