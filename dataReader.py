@@ -357,5 +357,6 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111)  # 定义子图
     plt.xticks(rotation=90)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
+
     ax.plot(t_list, fsh, 'b')
     plt.show()

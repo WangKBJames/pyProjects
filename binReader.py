@@ -184,19 +184,19 @@ def wind_reader(file_path, return_ref=[0, 1, 2, 3]):
         # print(sensor_num)
         # 采样频率
         sample_frq = struct.unpack('f', f.read(4))[0]
-        print(sample_frq)
+        # print(sample_frq)
         # 采样精度
         sample_precision = struct.unpack('f', f.read(4))[0]
-        print(sample_precision)
+        # print(sample_precision)
         # 放大倍数
         scalor = int.from_bytes(f.read(4), byteorder='little', signed=False)
-        print(scalor)
+        # print(scalor)
         # 灵敏度
         sensitivity = struct.unpack('f', f.read(4))[0]
-        print(sensitivity)
+        # print(sensitivity)
         # 字符'$', 表示文件头的终结
-        # f.read(1)
-        print(str(f.read(1), encoding="utf-8"))
+        f.read(1)
+        # print(str(f.read(1), encoding="utf-8"))
         data_str = [str(data_str_i, encoding="utf-8")[0:-2].split(sep=",")
                     for data_str_i in f.readlines()]
         f.close()
