@@ -12,16 +12,34 @@ from scipy.stats import pearsonr
 
 # hypothesis function
 def hypothesis_func(w, x):
+    '''
+
+    :param w:
+    :param x:
+    :return:
+    '''
     w1, w0 = w
     return w1 * x + w0
 
 
 # error function
 def error_func(w, train_x, train_y):
+    '''
+
+    :param w:
+    :param train_x:
+    :param train_y:
+    :return:
+    '''
     return hypothesis_func(w, train_x) - train_y
 
 
 def dump_fit_func(w_fit):
+    '''
+
+    :param w_fit:
+    :return:
+    '''
     w1, w0 = w_fit
     print("fitting line=", str(w1) + "*x + " + str(w0))
     return
@@ -29,6 +47,13 @@ def dump_fit_func(w_fit):
 
 # square error平方差函数
 def dump_fit_cost(w_fit, train_x, train_y):
+    '''
+
+    :param w_fit:
+    :param train_x:
+    :param train_y:
+    :return:
+    '''
     error = error_func(w_fit, train_x, train_y, "")
     square_error = sum(e * e for e in error)
     print('fitting cost:', str(square_error))
@@ -51,6 +76,17 @@ corr：float，相关系数
 
 
 def correlation(x_signal, y_signal):
+    '''
+
+    :param x_signal: float[]，时程数据1
+    :param y_signal: float[]，时程数据2
+    :return:
+    x_fit: float[]，频率，单位：Hz
+    y_fit：float[]，相干函数
+    a: float，相关函数y=a*x+b,系数a
+    b: float，相关函数y=a*x+b,系数b
+    corr：float，相关系数
+    '''
     if type(x_signal) is not np.ndarray:
         x_signal = np.array(x_signal, dtype='float')
     if type(x_signal) is not np.ndarray:

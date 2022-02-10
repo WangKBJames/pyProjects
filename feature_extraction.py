@@ -39,6 +39,11 @@ def error_func(w, train_x, train_y):
 
 
 def cumulation(y_signal, fs):
+    '''
+    :param y_signal:
+    :param fs:
+    :return:
+    '''
     if type(y_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
     y_cum = np.array([0], dtype='float') + np.cumsum(np.abs(np.diff(y_signal)))
