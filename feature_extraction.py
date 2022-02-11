@@ -19,6 +19,7 @@ def spectrum(y_signal, fs):
     """
     if type(y_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
+    y_signal[np.isnan(y_signal)] = np.nanmean(y_signal)
     fft_y = np.fft.rfft(y_signal)
     n = int(len(y_signal))
     abs_fy = np.abs(fft_y) / n * 2

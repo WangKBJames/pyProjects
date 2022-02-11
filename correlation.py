@@ -59,21 +59,6 @@ def dump_fit_cost(w_fit, train_x, train_y):
     print('fitting cost:', str(square_error))
     return square_error
 
-'''
-
-计算相关函数
-输入：
-x_signal：float[]，时程数据1
-y_signal：float[]，时程数据2
-输出：
-x_fit: float[]，频率，单位：Hz
-y_fit：float[]，相干函数
-a: float，相关函y=a*x+b,系数a
-b: float，相关函y=a*x+b,a
-corr：float，相关系数
-
-'''
-
 
 def correlation(x_signal, y_signal):
     '''
@@ -89,8 +74,10 @@ def correlation(x_signal, y_signal):
     '''
     if type(x_signal) is not np.ndarray:
         x_signal = np.array(x_signal, dtype='float')
+    x_signal[np.isnan(x_signal)] = np.nanmean(x_signal)
     if type(x_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
+    y_signal[np.isnan(y_signal)] = np.nanmean(y_signal)
     w_init = [1.0, 1.0]
     fit_ret = leastsq(error_func, w_init, args=(x_signal, y_signal))
     a, b = fit_ret[0]
@@ -103,8 +90,8 @@ def correlation(x_signal, y_signal):
 
 if __name__ == "__main__":
     # train set
-    x_signal = np.array([8.19, 2.72, 6.39, 8.71, 4.7, 2.66, 3.78])
-    y_signal = np.array([7.01, 2.78, 6.47, 6.71, 4.1, 4.23, 4.05])*0.01
+    x_signal = np.array([8.19, np.nan, 6.39, 8.71, 4.7, 2.66, 3.78])
+    y_signal = np.array([7.01, 2.78, 6.47, 6.71, 4.1, np.nan, 4.05]) * 0.01
     x_fit, y_fit, a, b, corr = correlation(x_signal, y_signal)
 
     # show result by figure
