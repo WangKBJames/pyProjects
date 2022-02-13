@@ -15,3 +15,24 @@ print(tl)
 # print(match_obj.group(3))
 # print(type(match_obj.group(4)))
 np.arange()
+
+
+if __name__ == "__main__":
+    import numpy as np
+
+    import pylab as plt
+
+    import statsmodels.api as sm
+
+    x = np.linspace(0, 2 * np.pi, 100)
+
+    y = np.sin(x) + np.random.random(100) * 0.2
+    y[40:50] = y[40:50]+1
+
+    lowess = sm.nonparametric.lowess(y, x, frac=0.4)
+
+    plt.plot(x, y, '+')
+
+    plt.plot(lowess[:, 0], lowess[:, 1])
+
+    plt.show()
