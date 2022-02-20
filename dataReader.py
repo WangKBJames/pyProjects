@@ -339,7 +339,6 @@ def data_location(main_path, sensor_num, t):
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import time
-    import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     import numpy as np
     main_path = r"I:\JSTI\数据\江阴\江阴数据\FS"

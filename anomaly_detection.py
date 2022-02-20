@@ -46,11 +46,33 @@ def weightRegression(x_list, y_list, w):
     :return:
     '''
     x2 = x_list.reshape(1, len(x_list))
-    y_list_regress = x2.dot(np.linalg.inv(x2.T.dot((w * x_list).reshape(1, len(x_list))))).dot(x2.T.dot((w * y_list).reshape(1, len(x_list))))
+    # y_list_regress = x2.dot(np.linalg.inv(x2.T.dot((w * x_list).reshape(1, len(x_list))))).dot(x2.T.dot((w * y_list).reshape(1, len(x_list))))
+    y_list_regress = x2.T.dot(np.linalg.inv(x2.dot((w * x_list).reshape(len(x_list), 1)))).dot(
+        x2.dot((w * y_list).reshape(len(x_list), 1)))
     return y_list_regress.reshape(len(y_list))
 
 
-def rlowess(data_x, data_y, frac, iter):
+def cal_new_weight(y_hat, y_list, w, wfunc="B"):
+    '''
+    :param y_hat:
+    :param data_y:
+    :param func: string, "B"二次权重函数，"w"三次权重函数
+    :return:
+    '''
+    err = y_list - y_hat
+    err_max = np.nanmax(np.abs(err))
+    s = np.nanmedian(np.abs(err))
+    err_norm = err / 6 / s
+    if wfunc == "B":
+        delta_k = (1 - err_norm ** 2) ** 2
+    elif wfunc == "W":
+        delta_k = (1 - np.abs(err_norm) ** 3) ** 3
+    delta_k[abs(err_norm) > 1] = 0
+    new_w = delta_k * w
+    return new_w
+
+
+def rlowess(data_x, data_y, frac, iters=2):
     '''
     鲁棒性的加权回归：
     Cleveland, W.S. (1979) “Robust Locally Weighted Regression and Smoothing Scatterplots”. Journal of the American Statistical Association 74 (368): 829-836.
@@ -59,7 +81,17 @@ def rlowess(data_x, data_y, frac, iter):
     :param frac:
     :return:
     '''
-    pass
+    data_y_hat = np.ones_like(data_y)
+    half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
+    for x in data_x:
+        x_list = get_range(x, data_x, frac)
+        new_w = calFuncW(x_list)
+        y_hat = weightRegression(x_list, data_y[x_list], new_w)
+        for it in range(iters):
+            new_w = cal_new_weight(y_hat, data_y[x_list], new_w, wfunc="B")
+            y_hat = weightRegression(x_list, data_y[x_list], new_w)
+        data_y_hat[x] = y_hat[half_len_w+1]
+    return data_y_hat
 
 
 def lwlr(testPoint, xArr, yArr, tao=1.0):
@@ -103,9 +135,33 @@ def lwlrTest(testArr, xArr, yArr, tao=1.0):
 
 
 if __name__ == "__main__":
-    data_x = np.arange(10)
-    x = 0
-    frac = 0.4
-    get_range(x, data_x, frac)
+    import matplotlib.pyplot as plt
+    import statsmodels.api as sm
+    # data_x = np.arange(100)
+    # x = 30
+    # frac = 0.4
+    # x_list = get_range(x, data_x, frac)
+    # w = calFuncW(x_list)
+    # data_y = np.random.randn(100)
+    # y_hat = weightRegression(x_list, data_y[x_list], w)
+    # new_w = cal_new_weight(y_hat, data_y[x_list], w, wfunc="B")
+    data_x = np.arange(10000)
+    data_y = np.sin(0.001*data_x) + np.random.randn(10000)*0.1
+    data_y[5000:5500] = data_y[5000:5500] + 0.2
+    data_y_hat = rlowess(data_x, data_y, frac=0.5, iters=3)
+    data_y_hat2 = sm.nonparametric.lowess(data_y, data_x, frac=0.1, it=10, delta=0)
 
-    pass
+    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+    plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+    fig = plt.figure(figsize=(12, 6))  # 定义图并设置画板尺寸
+    fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+    # fig.tight_layout()                                                    # 调整整体空白
+    plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
+    ax = fig.add_subplot(111)  # 定义子图
+    # plt.xticks(rotation=90)
+    ax.plot(data_x, data_y, 'b')
+    # ax.plot(data_x, data_y_hat)
+    ax.plot(data_x, data_y_hat2.T[1])
+    plt.show()
+
+
