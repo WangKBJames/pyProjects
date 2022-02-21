@@ -2,9 +2,32 @@
 import numpy as np
 
 
+# def get_range(x, data_x, frac):
+#     '''
+#     以x为中心，找着frac的比例截取数据
+#     :param x: 数据中心
+#     :param data_x: 数据x
+#     :param frac: 截取比例
+#     :return: np.array
+#     '''
+#     x_ind = np.argwhere(data_x == x)[0][0]
+#     half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
+#     len_x_list = 2 * half_len_w + 1
+#     if (x_ind - half_len_w) < 0:
+#         x_list = data_x[0:x_ind + half_len_w + 1]
+#         x_list = np.insert(x_list, 0, np.flipud(x_list)[0:half_len_w - x_ind])
+#         return x_list
+#     if (x_ind + half_len_w) > len(data_x):
+#         x_list = data_x[x_ind - half_len_w:]
+#         x_list = np.insert(x_list, len(x_list), np.flipud(x_list[0:len_x_list - len(x_list)]))
+#         return x_list
+#     x_list = data_x[x_ind - half_len_w:x_ind + half_len_w + 1]
+#     return x_list
+
+
 def get_range(x, data_x, frac):
     '''
-    以x为中心，找着frac的比例截取数据
+    以x为中心，找着frac的比例截取数据，端部数据取同等长度
     :param x: 数据中心
     :param data_x: 数据x
     :param frac: 截取比例
@@ -14,53 +37,72 @@ def get_range(x, data_x, frac):
     half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
     len_x_list = 2 * half_len_w + 1
     if (x_ind - half_len_w) < 0:
-        x_list = data_x[0:x_ind + half_len_w + 1]
-        x_list = np.insert(x_list, 0, np.flipud(x_list)[0:half_len_w - x_ind])
-        return x_list
-    if (x_ind + half_len_w) > len(data_x):
-        x_list = data_x[x_ind - half_len_w:]
-        x_list = np.insert(x_list, len(x_list), np.flipud(x_list[0:len_x_list - len(x_list)]))
-        return x_list
-    x_list = data_x[x_ind - half_len_w:x_ind + half_len_w + 1]
-    return x_list
+        x_list = data_x[0:2 * half_len_w + 1]
+        x_loc = x_ind
+    elif (x_ind + half_len_w) >= len(data_x):
+        x_list = data_x[-len_x_list:]
+        x_loc = x_ind - len(data_x)
+    else:
+        x_list = data_x[x_ind - half_len_w:x_ind + half_len_w + 1]
+        x_loc = half_len_w
+    return x_list, x_loc
 
 
-def calFuncW(x_list):
+def calFuncW(x_list, x_loc):
     '''
     以w函数计算权值函数
     :param x_list: 计算权值的x序列
     :return:
     '''
     len_x_list = len(x_list)
-    x_norm = np.linspace(-1, 1, len_x_list + 2)
-    w = (1 - x_norm ** 2) ** 2
-    return w[1:-1]
+    if 2 * x_loc + 1 == len_x_list:
+        x_norm = np.linspace(-1, 1, len_x_list + 2)
+        w = (1 - x_norm ** 2) ** 2
+        w = w[1:-1]
+    elif x_loc > 0:
+        x_norm = np.linspace(-1, 1, (len_x_list-x_loc-1) * 2 + 3)
+        w = (1 - x_norm ** 2) ** 2
+        w = w[-len_x_list-1:-1]
+    else:
+        x_norm = np.linspace(-1, 1, (len_x_list + x_loc) * 2 + 3)
+        w = (1 - x_norm ** 2) ** 2
+        w = w[1:len_x_list+1]
+    return w
 
 
-def weightRegression(x_list, y_list, w):
+def weightRegression(x_list, y_list, w, fitfunc="T"):
     '''
-    计算
+    权重回归分析
     :param x_list:
     :param y_list:
     :param w:
     :return:
     '''
-    x2 = x_list.reshape(1, len(x_list))
+    # x2 = x_list.reshape(1, len(x_list))
+    y2 = y_list.reshape(1, len(x_list))
+    w2 = w.reshape(1, len(x_list))
     # y_list_regress = x2.dot(np.linalg.inv(x2.T.dot((w * x_list).reshape(1, len(x_list))))).dot(x2.T.dot((w * y_list).reshape(1, len(x_list))))
-    y_list_regress = x2.T.dot(np.linalg.inv(x2.dot((w * x_list).reshape(len(x_list), 1)))).dot(
-        x2.dot((w * y_list).reshape(len(x_list), 1)))
+    if fitfunc == "B":
+        x2 = np.ones([2, len(x_list)])
+        x2[0] = x_list
+        y_list_regress = x2.T.dot(np.linalg.inv(x2.dot((w2 * x2).T))).dot(x2.dot((w2 * y2).T))
+    elif fitfunc == "T":
+        x2 = np.ones([3, len(x_list)])
+        x2[0] = x_list ** 2
+        x2[1] = x_list
+        y_list_regress = x2.T.dot(np.linalg.inv(x2.dot((w2 * x2).T))).dot(x2.dot((w2 * y2).T))
     return y_list_regress.reshape(len(y_list))
 
 
 def cal_new_weight(y_hat, y_list, w, wfunc="B"):
     '''
-    :param y_hat:
-    :param data_y:
+    计算局部回归调整后权重
+    :param y_hat: 局部回归后输出数据
+    :param data_y: 原始数据
     :param func: string, "B"二次权重函数，"w"三次权重函数
     :return:
     '''
     err = y_list - y_hat
-    err_max = np.nanmax(np.abs(err))
     s = np.nanmedian(np.abs(err))
     err_norm = err / 6 / s
     if wfunc == "B":
@@ -84,13 +126,35 @@ def rlowess(data_x, data_y, frac, iters=2):
     data_y_hat = np.ones_like(data_y)
     half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
     for x in data_x:
+        x_list, x_loc = get_range(x, data_x, frac)
+        new_w = calFuncW(x_list, x_loc)
+        y_hat = weightRegression(x_list, data_y[x_list], new_w)
+        for it in range(iters):
+            new_w = cal_new_weight(y_hat, data_y[x_list], new_w, wfunc="B")
+            y_hat = weightRegression(x_list, data_y[x_list], new_w, "B")
+        data_y_hat[x] = y_hat[half_len_w + 1]
+    return data_y_hat
+
+
+def rloess(data_x, data_y, frac, iters=2):
+    '''
+    鲁棒性的加权回归：
+    Cleveland, W.S. (1979) “Robust Locally Weighted Regression and Smoothing Scatterplots”. Journal of the American Statistical Association 74 (368): 829-836.
+    :param data_x:
+    :param data_y:
+    :param frac:
+    :return:
+    '''
+    data_y_hat = np.ones_like(data_y)
+    half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
+    for x in data_x:
         x_list = get_range(x, data_x, frac)
         new_w = calFuncW(x_list)
         y_hat = weightRegression(x_list, data_y[x_list], new_w)
         for it in range(iters):
             new_w = cal_new_weight(y_hat, data_y[x_list], new_w, wfunc="B")
             y_hat = weightRegression(x_list, data_y[x_list], new_w)
-        data_y_hat[x] = y_hat[half_len_w+1]
+        data_y_hat[x] = y_hat[half_len_w + 1]
     return data_y_hat
 
 
@@ -137,6 +201,7 @@ def lwlrTest(testArr, xArr, yArr, tao=1.0):
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import statsmodels.api as sm
+
     # data_x = np.arange(100)
     # x = 30
     # frac = 0.4
@@ -146,10 +211,10 @@ if __name__ == "__main__":
     # y_hat = weightRegression(x_list, data_y[x_list], w)
     # new_w = cal_new_weight(y_hat, data_y[x_list], w, wfunc="B")
     data_x = np.arange(10000)
-    data_y = np.sin(0.001*data_x) + np.random.randn(10000)*0.1
-    data_y[5000:5500] = data_y[5000:5500] + 0.2
-    data_y_hat = rlowess(data_x, data_y, frac=0.5, iters=3)
-    data_y_hat2 = sm.nonparametric.lowess(data_y, data_x, frac=0.1, it=10, delta=0)
+    data_y = np.sin(0.001 * data_x) + np.random.randn(10000) * 0.1
+    data_y[3000:3500] = data_y[3000:3500] + 0.3
+    data_y_hat = rlowess(data_x, data_y, frac=0.4, iters=15)
+    # data_y_hat2 = sm.nonparametric.lowess(data_y, data_x, frac=0.2, it=10, delta=0)
 
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
     plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
@@ -160,8 +225,6 @@ if __name__ == "__main__":
     ax = fig.add_subplot(111)  # 定义子图
     # plt.xticks(rotation=90)
     ax.plot(data_x, data_y, 'b')
-    # ax.plot(data_x, data_y_hat)
-    ax.plot(data_x, data_y_hat2.T[1])
+    ax.plot(data_x, data_y_hat)
+    # ax.plot(data_x, data_y_hat2.T[1])
     plt.show()
-
-
