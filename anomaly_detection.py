@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-
+import scipy.interpolate as spi
 
 # def get_range(x, data_x, frac):
 #     '''
@@ -34,10 +34,10 @@ def get_range(x, data_x, frac):
     :return: np.array
     '''
     x_ind = np.argwhere(data_x == x)[0][0]
-    half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
+    half_len_w = int(np.floor((data_x.shape[0] * frac) / 2))
     len_x_list = 2 * half_len_w + 1
     if (x_ind - half_len_w) < 0:
-        x_list = data_x[0:2 * half_len_w + 1]
+        x_list = data_x[0:len_x_list]
         x_loc = x_ind
     elif (x_ind + half_len_w) >= len(data_x):
         x_list = data_x[-len_x_list:]
@@ -59,7 +59,7 @@ def calFuncW(x_list, x_loc):
         x_norm = np.linspace(-1, 1, len_x_list + 2)
         w = (1 - x_norm ** 2) ** 2
         w = w[1:-1]
-    elif x_loc > 0:
+    elif x_loc >= 0:
         x_norm = np.linspace(-1, 1, (len_x_list-x_loc-1) * 2 + 3)
         w = (1 - x_norm ** 2) ** 2
         w = w[-len_x_list-1:-1]
@@ -132,11 +132,11 @@ def rlowess(data_x, data_y, frac, iters=2):
         for it in range(iters):
             new_w = cal_new_weight(y_hat, data_y[x_list], new_w, wfunc="B")
             y_hat = weightRegression(x_list, data_y[x_list], new_w, "B")
-        data_y_hat[x] = y_hat[half_len_w + 1]
+        data_y_hat[x] = y_hat[x_loc]
     return data_y_hat
 
 
-def rloess(data_x, data_y, frac, iters=2):
+def rloess(data_x, data_y, frac, step=1, iters=2):
     '''
     鲁棒性的加权回归：
     Cleveland, W.S. (1979) “Robust Locally Weighted Regression and Smoothing Scatterplots”. Journal of the American Statistical Association 74 (368): 829-836.
@@ -145,16 +145,22 @@ def rloess(data_x, data_y, frac, iters=2):
     :param frac:
     :return:
     '''
-    data_y_hat = np.ones_like(data_y)
+    # data_y_hat = np.ones_like(data_y)
     half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
-    for x in data_x:
-        x_list = get_range(x, data_x, frac)
-        new_w = calFuncW(x_list)
+    data_x_step = data_x[0::step]
+    if data_x_step[-1] != data_x[-1]:
+        data_x_step = np.append(data_x_step, data_x[-1])
+    data_y_hat_step = np.random.random(len(data_x_step))
+    for x in range(len(data_x_step)):
+        x_list, x_loc = get_range(data_x_step[x], data_x, frac)
+        new_w = calFuncW(x_list, x_loc)
         y_hat = weightRegression(x_list, data_y[x_list], new_w)
         for it in range(iters):
             new_w = cal_new_weight(y_hat, data_y[x_list], new_w, wfunc="B")
             y_hat = weightRegression(x_list, data_y[x_list], new_w)
-        data_y_hat[x] = y_hat[half_len_w + 1]
+        data_y_hat_step[x] = y_hat[x_loc]
+    data_y_hat_rep = spi.splrep(data_x_step, data_y_hat_step, k=2)
+    data_y_hat = spi.splev(data_x, data_y_hat_rep)
     return data_y_hat
 
 
@@ -210,10 +216,10 @@ if __name__ == "__main__":
     # data_y = np.random.randn(100)
     # y_hat = weightRegression(x_list, data_y[x_list], w)
     # new_w = cal_new_weight(y_hat, data_y[x_list], w, wfunc="B")
-    data_x = np.arange(10000)
-    data_y = np.sin(0.001 * data_x) + np.random.randn(10000) * 0.1
-    data_y[3000:3500] = data_y[3000:3500] + 0.3
-    data_y_hat = rlowess(data_x, data_y, frac=0.4, iters=15)
+    data_x = np.arange(9501)
+    data_y = np.sin(0.001 * data_x) + np.random.randn(9501) * 0.1
+    data_y[3000:3500] = data_y[3000:3500] + 0.5
+    data_y_hat = rloess(data_x, data_y, frac=0.5, step=100, iters=4)
     # data_y_hat2 = sm.nonparametric.lowess(data_y, data_x, frac=0.2, it=10, delta=0)
 
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
