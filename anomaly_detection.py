@@ -2,6 +2,7 @@
 import numpy as np
 import scipy.interpolate as spi
 
+
 # def get_range(x, data_x, frac):
 #     '''
 #     以x为中心，找着frac的比例截取数据
@@ -60,13 +61,13 @@ def calFuncW(x_list, x_loc):
         w = (1 - x_norm ** 2) ** 2
         w = w[1:-1]
     elif x_loc >= 0:
-        x_norm = np.linspace(-1, 1, (len_x_list-x_loc-1) * 2 + 3)
+        x_norm = np.linspace(-1, 1, (len_x_list - x_loc - 1) * 2 + 3)
         w = (1 - x_norm ** 2) ** 2
-        w = w[-len_x_list-1:-1]
+        w = w[-len_x_list - 1:-1]
     else:
         x_norm = np.linspace(-1, 1, (len_x_list + x_loc) * 2 + 3)
         w = (1 - x_norm ** 2) ** 2
-        w = w[1:len_x_list+1]
+        w = w[1:len_x_list + 1]
     return w
 
 
@@ -143,6 +144,8 @@ def rloess(data_x, data_y, frac, step=1, iters=2):
     :param data_x:
     :param data_y:
     :param frac:
+    :param step:
+    :param iters:
     :return:
     '''
     # data_y_hat = np.ones_like(data_y)
@@ -151,6 +154,7 @@ def rloess(data_x, data_y, frac, step=1, iters=2):
     if data_x_step[-1] != data_x[-1]:
         data_x_step = np.append(data_x_step, data_x[-1])
     data_y_hat_step = np.random.random(len(data_x_step))
+    w_list = np.random.random(len(data_x_step))
     for x in range(len(data_x_step)):
         x_list, x_loc = get_range(data_x_step[x], data_x, frac)
         new_w = calFuncW(x_list, x_loc)
@@ -159,9 +163,10 @@ def rloess(data_x, data_y, frac, step=1, iters=2):
             new_w = cal_new_weight(y_hat, data_y[x_list], new_w, wfunc="B")
             y_hat = weightRegression(x_list, data_y[x_list], new_w)
         data_y_hat_step[x] = y_hat[x_loc]
+        w_list[x] = new_w[x_loc]
     data_y_hat_rep = spi.splrep(data_x_step, data_y_hat_step, k=2)
     data_y_hat = spi.splev(data_x, data_y_hat_rep)
-    return data_y_hat
+    return data_y_hat, w_list
 
 
 def lwlr(testPoint, xArr, yArr, tao=1.0):
@@ -204,33 +209,77 @@ def lwlrTest(testArr, xArr, yArr, tao=1.0):
     return yHat
 
 
+def isoutlier(data_y, data_y_hat, rate_threshould):
+
+    y_norm = data_y - data_y_hat
+    dy = np.diff(y_norm)
+    dy_mid = np.nanmedian(np.abs(dy))
+    out_ind = np.argwhere(abs(dy) >= rate_threshould).T[0]
+    for i in out_ind:
+        pass
+    y_std = np.nanstd(y_norm)
+    out_ind = np.argwhere(np.abs(y_norm) > 3*y_std).T[0]
+    return
+
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import statsmodels.api as sm
 
-    # data_x = np.arange(100)
-    # x = 30
-    # frac = 0.4
-    # x_list = get_range(x, data_x, frac)
-    # w = calFuncW(x_list)
-    # data_y = np.random.randn(100)
-    # y_hat = weightRegression(x_list, data_y[x_list], w)
-    # new_w = cal_new_weight(y_hat, data_y[x_list], w, wfunc="B")
-    data_x = np.arange(9501)
-    data_y = np.sin(0.001 * data_x) + np.random.randn(9501) * 0.1
-    data_y[3000:3500] = data_y[3000:3500] + 0.5
-    data_y_hat = rloess(data_x, data_y, frac=0.5, step=100, iters=4)
-    # data_y_hat2 = sm.nonparametric.lowess(data_y, data_x, frac=0.2, it=10, delta=0)
+    if False:
+        # data_x = np.arange(100)
+        # x = 30
+        # frac = 0.4
+        # x_list = get_range(x, data_x, frac)
+        # w = calFuncW(x_list)
+        # data_y = np.random.randn(100)
+        # y_hat = weightRegression(x_list, data_y[x_list], w)
+        # new_w = cal_new_weight(y_hat, data_y[x_list], w, wfunc="B")
+        data_x = np.arange(9501)
+        data_y = np.sin(0.001 * data_x) + np.random.randn(9501) * 0.1
+        data_y[3000:3500] = data_y[3000:3500] + 0.5
+        data_y_hat, w_list = rloess(data_x, data_y, frac=0.5, step=1, iters=4)
+        # data_y_hat2 = sm.nonparametric.lowess(data_y, data_x, frac=0.2, it=10, delta=0)
 
-    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
-    plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
-    fig = plt.figure(figsize=(12, 6))  # 定义图并设置画板尺寸
-    fig.set(alpha=0.2)  # 设定图表颜色alpha参数
-    # fig.tight_layout()                                                    # 调整整体空白
-    plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
-    ax = fig.add_subplot(111)  # 定义子图
-    # plt.xticks(rotation=90)
-    ax.plot(data_x, data_y, 'b')
-    ax.plot(data_x, data_y_hat)
-    # ax.plot(data_x, data_y_hat2.T[1])
-    plt.show()
+        plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+        plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+        fig = plt.figure(figsize=(12, 12))  # 定义图并设置画板尺寸
+        fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+        # fig.tight_layout()                                                    # 调整整体空白
+        # plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
+        ax1 = fig.add_subplot(211)  # 定义子图
+        # plt.xticks(rotation=90)
+        ax1.plot(data_x, data_y, 'b')
+        ax1.plot(data_x, data_y_hat)
+        # ax.plot(data_x, data_y_hat2.T[1])
+        ax2 = fig.add_subplot(212)  # 定义子图
+        # plt.xticks(rotation=90)
+        ax2.plot(data_x, data_y - data_y_hat, 'b')
+        plt.show()
+
+    if True:
+        from dataReader import gnss_data
+
+        main_path = r"D:\pytestdata"
+        sensor_num = "BD080101"
+        t_start_list = [2021, 8, 21, 0, 0, 0]
+        t_end_list = [2021, 8, 30, 23, 0, 0]
+        t_list, data = gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
+        nd = np.array(data[2], dtype='float') * 100
+        nd = nd - np.nanmean(nd)
+        nd[np.isnan(nd)] = np.nanmean(nd)
+        x = np.arange(len(nd))
+        nd_hat, w_list = rloess(x, nd, frac=0.05, step=2000, iters=4)
+        fig = plt.figure(figsize=(12, 12))  # 定义图并设置画板尺寸
+        fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+        # fig.tight_layout()                                                    # 调整整体空白
+        # plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
+        ax1 = fig.add_subplot(111)  # 定义子图
+        # plt.xticks(rotation=90)
+        ax1.plot(x, nd, 'b')
+        ax1.plot(x, nd_hat)
+        # ax.plot(data_x, data_y_hat2.T[1])
+        # ax2 = fig.add_subplot(212)  # 定义子图
+        # # plt.xticks(rotation=90)
+        # ax2.plot(data_x, data_y - data_y_hat, 'b')
+        plt.show()
