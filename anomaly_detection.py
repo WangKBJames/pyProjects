@@ -220,12 +220,56 @@ def isoutlier(data_y, data_y_hat, rate_threshould):
     y_norm = data_y - data_y_hat
     dy = np.diff(y_norm)
     dy_mid = np.nanmedian(np.abs(dy))
-    out_ind = np.argwhere(abs(dy) >= rate_threshould).T[0]
-    out_flag = np.array([np.abs(y_norm[i]) > np.abs(y_norm[i-1]) for i in range(len(out_ind))])
+    out_ind = np.argwhere(np.abs(dy) >= rate_threshould).T[0]
+    y_std3 = np.nanstd(y_norm) * 3
+    out_alternative = np.argwhere(np.abs(y_norm) > y_std3)
+    margin_ind = []
+    margin_ind_i = [out_alternative[0]]
+    for i in range(1, len(out_alternative) - 1):
+        if (out_alternative(i) - out_alternative(i - 1)) > 1:
+            margin_ind_i[0] = out_alternative(i)
+        if (out_alternative(i + 1) - out_alternative(i)) > 1 or i == (len(out_alternative) - 2):
+            margin_ind_i.append(out_alternative(i))
+        if len(margin_ind_i) == 2:
+            margin_ind.append(margin_ind_i)
+            margin_ind = []
+    for margin_ind_i in margin_ind:
+        if margin_ind_i[0] in out_ind and margin_ind_i[1] + 1 in out_ind:
+            margin_i = margin_ind_i[0]
+            margin_j = margin_ind_i[1]
+            while True:
+                if margin_i - 1 in out_ind:
+                    margin_i -= 1
+                elif margin_i - 2 in out_ind:
+                    margin_i -= 2
+                elif margin_i - 3 in out_ind:
+                    margin_i -= 3
+                elif margin_i - 4 in out_ind:
+                    margin_i -= 4
+                elif margin_i - 5 in out_ind:
+                    margin_i -= 5
+                else:
+                    break
+            margin_j_p = margin_j + 1
+            while True:
+                if margin_j_p + 1 in out_ind:
+                    margin_j_p += 1
+                elif margin_j_p + 2 in out_ind:
+                    margin_j_p += 2
+                elif margin_j_p + 3 in out_ind:
+                    margin_j_p += 3
+                elif margin_j_p + 4 in out_ind:
+                    margin_j_p += 4
+                elif margin_j_p + 5 in out_ind:
+                    margin_j_p += 5
+                else:
+                    margin_j = margin_j_p - 1
+                    break
+            out_data = y_norm[margin_i:margin_j_p]
+            d_out_data = np.diff(out_data)
+            d_out_data[np.argwhere(np.abs(d_out_data) > rate_threshould)] = 0
+            out_data_zero = np.insert(np.cumsum(d_out_data), 0, 0.0)
 
-
-    y_std = np.nanstd(y_norm)
-    out_ind = np.argwhere(np.abs(y_norm) > 3*y_std).T[0]
     return
 
 
@@ -264,7 +308,7 @@ if __name__ == "__main__":
         ax2.plot(data_x, data_y - data_y_hat, 'b')
         plt.show()
 
-    if True:
+    if False:
         from dataReader import gnss_data
 
         main_path = r"D:\pytestdata"
@@ -285,6 +329,54 @@ if __name__ == "__main__":
         # plt.xticks(rotation=90)
         ax1.plot(x, nd, 'b')
         ax1.plot(x, nd_hat)
+        # ax.plot(data_x, data_y_hat2.T[1])
+        # ax2 = fig.add_subplot(212)  # 定义子图
+        # # plt.xticks(rotation=90)
+        # ax2.plot(data_x, data_y - data_y_hat, 'b')
+        plt.show()
+
+    if True:
+        from dataReader import gnss_data
+
+        main_path = r"D:\pytestdata"
+        sensor_num = "BD080101"
+        t_start_list = [2021, 8, 21, 0, 0, 0]
+        t_end_list = [2021, 8, 30, 23, 0, 0]
+        t_list, data = gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
+        nd = np.array(data[2], dtype='float') * 100
+        nd = nd - np.nanmean(nd)
+        nd[np.isnan(nd)] = np.nanmean(nd)
+        x = np.arange(len(nd))
+        nd_hat, w_list = rloess(x, nd, frac=0.05, step=2000, iters=4)
+        nd_norm = nd - nd_hat
+        dnd = np.diff(nd_norm)
+        dnd = np.insert(dnd, 0, 0.0)
+
+        rate_threshould = 10.0
+        out_ind = np.argwhere(abs(dnd) >= rate_threshould).T[0]
+
+        nd_mean = [np.nanmean(nd_norm[0:out_ind[0]])]
+
+        for i in range(len(out_ind) - 1):
+            nd_mean.append(np.nanmean(nd_norm[out_ind[i]:(out_ind[i + 1] - 1)]))
+        nd_mean.append(np.nanmean(nd_norm[out_ind[i + 1]:]))
+
+        # dnd_represent = []
+        # for i in x:
+        #     if np.abs(dnd[i]) > 10:
+        #         dnd_represent.append(dnd[i])
+        #     else:
+        #         dnd_represent.append(0.0)
+        # dnd_represent = np.array(dnd_represent).cumsum()
+
+        fig = plt.figure(figsize=(12, 12))  # 定义图并设置画板尺寸
+        fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+        # fig.tight_layout()                                                    # 调整整体空白
+        # plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
+        ax1 = fig.add_subplot(111)  # 定义子图
+        # plt.xticks(rotation=90)
+        ax1.plot(x, dnd_represent, 'b')
+        # ax1.plot(x, nd_hat)
         # ax.plot(data_x, data_y_hat2.T[1])
         # ax2 = fig.add_subplot(212)  # 定义子图
         # # plt.xticks(rotation=90)
