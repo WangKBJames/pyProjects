@@ -210,13 +210,20 @@ def lwlrTest(testArr, xArr, yArr, tao=1.0):
 
 
 def isoutlier(data_y, data_y_hat, rate_threshould):
+    '''
 
+    :param data_y:
+    :param data_y_hat:
+    :param rate_threshould:
+    :return:
+    '''
     y_norm = data_y - data_y_hat
     dy = np.diff(y_norm)
     dy_mid = np.nanmedian(np.abs(dy))
     out_ind = np.argwhere(abs(dy) >= rate_threshould).T[0]
-    for i in out_ind:
-        pass
+    out_flag = np.array([np.abs(y_norm[i]) > np.abs(y_norm[i-1]) for i in range(len(out_ind))])
+
+
     y_std = np.nanstd(y_norm)
     out_ind = np.argwhere(np.abs(y_norm) > 3*y_std).T[0]
     return
