@@ -114,7 +114,7 @@ def txt_reader(file_path, return_ref=0):
             if type(return_ref) == int:
                 return [float(data_str_i[return_ref]) for data_str_i in data_str]
             elif type(return_ref) == list:
-                return ([float(data_str_i[i]) for data_str_i in data_str] for i in return_ref)
+                return [[float(data_str_i[i]) for data_str_i in data_str] for i in return_ref]
             else:
                 return [float(data_str_i[0]) for data_str_i in data_str]
     except BaseException:
@@ -135,14 +135,14 @@ def gnss_reader(file_path, return_ref=2):
             if type(return_ref) == int:
                 return t, [float(data_str[i][return_ref + 2]) for i in range(0, len(data_str), 2)]
             elif type(return_ref) == list:
-                return t, *([float(data_str[i][j + 2]) for i in range(0, len(data_str), 2)] for j in return_ref)
+                return t, [[float(data_str[i][j + 2]) for i in range(0, len(data_str), 2)] for j in return_ref]
             else:
                 return t, [float(data_str[i][return_ref + 2]) for i in range(0, len(data_str), 2)]
     except BaseException:
         if type(return_ref) == int:
             return [], []
         else:
-            return [], *tuple([] for i in return_ref)
+            return [], tuple([] for i in return_ref)
 
 
 # len1 = bin_reader(r"E:\RecycleBin~1cdd.ffs_tmp\data\新建文件夹\南京三桥数据201801\WD\温度\2018\01\22\WD010101_200009.WD")

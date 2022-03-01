@@ -189,7 +189,7 @@ def gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1,
                             file_list.extend(data_location(main_path, sensor_num, t))
                     if len(file_list) > 0:
                         for file_str in file_list:
-                            t_list_i, *data_i = gnss_reader(file_str, return_ref)
+                            t_list_i, data_i = gnss_reader(file_str, return_ref)
                             t_list.extend(t_list_i)
                             if len(data_i[0]) > 0:
                                 if len(data_i[0]) > sample_frq * 3600:
