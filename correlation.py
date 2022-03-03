@@ -85,7 +85,7 @@ def correlation(x_signal, y_signal):
     y_fit = hypothesis_func([a, b], x_fit)
     corr = pearsonr(x_signal, y_signal)
     # return x_fit.tolist(), y_fit.tolist(), np.float(a), np.float(b), np.float(corr[0])
-    return x_fit.tolist(), y_fit.tolist(), float(a), float(b), float(corr[0])
+    return [x_fit.tolist(), y_fit.tolist(), float(a), float(b), float(corr[0])]
 
 
 if __name__ == "__main__":

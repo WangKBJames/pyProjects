@@ -63,12 +63,45 @@ def wind_stats(wind_velocity, sample_frq=1):
     return wmean_2min, wmean_10min, wpulse, wstd_10min
 
 
-def attack_angle(angle):
-    '''
 
-    :param angle:
-    :return:
+def wind_par(wind_velocity, sample_frq=1):
     '''
+    计算风场参数，图1 y轴
+    :param wind_velocity: float[] 实时风速, 图1，y轴第1条数据（x轴为时间）
+    :param sample_frq: float 采样频率，缺省值为1，
+    :return: list[]
+    list[0]: wmean_2min: float[] 2分钟平均风速时程，单位：m/s,图1，y轴第2条数据（x轴为时间）
+    list[1]: wmean_10min:  float[] 10分钟平均风速时程，单位：m/s,图2，y轴第3条数据（x轴为时间）
+    list[2]:  wpulse:  float[] 脉动风速时程，单位：m/s,图1，y轴第4条数据（x轴为时间）
+    list[3]:  wstd_10min:  float[] 10分钟风速均方根，单位：m/s,图1，y轴第5条数据（x轴为时间）
+    list[4]: w_max: float  瞬时风速极值，单位：m/s, 文本区域
+    list[5]: w2_max: float  2分钟风速极值，单位：m/s, 文本区域
+    list[6]: w10_max: float  10分钟风速极值，单位：m/s, 文本区域
+    list[7]: wstd_max: float  10分钟均方根极值，单位：m/s, 文本区域
+    list[8]: wm: float  瞬时风速均值，单位：m/s, 文本区域
+
+    '''
+    wmean_2min, wmean_10min, wpulse, wstd_10min = wind_stats(wind_velocity, sample_frq=1)
+
+    return [wmean_2min, wmean_10min, wpulse, wstd_10min, float(np.max(wind_velocity)), float(np.max(wmean_2min)), float(np.max(wmean_10min)), float(np.max(wstd_10min)), float(np.nanmean(wind_velocity))]
+
+def attack_angle(angle):
+
+    '''
+    风攻角计算，图2
+    :param angle: float[]  风竖向角数据（风数据最后一列）
+    :return:
+    attack_angel: float[]  风攻角数据（图3纵坐标，横坐标为时间）
+    '''
+    # if type(angle) is not np.ndarray:
+    #     angle = np.array(angle, dtype='float')
+    # angle[np.isnan(angle)] = np.nanmean(angle)
+    # angle_attack = angle
+    # for i in range(len(angle)):
+    #     if angle[i] > 0:
+    #         angle_attack[i] = 90 - angle[i]
+    #     else:
+    #         angle_attack[i] = -90 - angle[i]
     return angle
 
 
@@ -91,11 +124,13 @@ def spectrum(y_signal, fs):
 
 def wind_spectrum(wind_velocity, h_angle, attack_angle, sample_frq=1):
     '''
-    风谱
-    :param wind_velocity:
-    :param attack_angle:
-    :param sample_frq:
+    风谱计算 图4
+    :param wind_velocity: float[] 实时风速数据（风速数据第2列）
+    :param attack_angle: float[] 风水平角数据（风速数据第3列）
+    :param sample_frq: float[] 数向角数据（风速数据第4列）
     :return:
+    frq：float[] 频率 图3的横坐标，单位(Hz)
+    ffy：float[] 频谱数据 图3的纵坐标，单位：(幅值)
     '''
     if type(wind_velocity) is not np.ndarray:
         wind_velocity = np.array(wind_velocity, dtype='float')
@@ -117,17 +152,19 @@ def wind_spectrum(wind_velocity, h_angle, attack_angle, sample_frq=1):
     n = int(len(wind_pulse))
     abs_fy = (np.abs(fft_y) * 2) ** 2 / n
     freqs = np.linspace(0, sample_frq / 2, int(n / 2 + 1))
-    return freqs[1:].tolist(), abs_fy[1:].tolist()
+    return [freqs[1:].tolist(), abs_fy[1:].tolist()]
 
 
 def turbulence(wind_velocity, h_angle, attack_angle, sample_frq=1):
     '''
-    紊流强度
-    :param wind_velocity:
-    :param h_angle:
-    :param attack_angle:
-    :param sample_frq:
-    :return:
+    紊流强度、阵风因子计算，图5，图6
+    :param wind_velocity: float[] 实时风速数据（风速数据第2列）
+    :param h_angle:  float[] 风水平角数据（风速数据第3列）
+    :param attack_angle:  float[] 数向角数据（风速数据第4列）
+    :param sample_frq: float 采样频率，缺省值为1
+    :return: list
+    list[0]: tur_intensity: float[] 湍流强度（无单位），图4纵坐标，（横坐标为时间）
+    list[1]: gustiness_factor: float[] 阵风系数（无单位），图5纵坐标，（横坐标为时间）
     '''
     if type(wind_velocity) is not np.ndarray:
         wind_velocity = np.array(wind_velocity, dtype='float')
@@ -147,7 +184,7 @@ def turbulence(wind_velocity, h_angle, attack_angle, sample_frq=1):
     fs3s = movmean(wind_h, 3 * sample_frq)
     tur_intensity = [f_std[i] / fs10[i] for i in range(len(f_std))]  # 紊流强度
     gustiness_factor = [fs3s[i] / fs10[i] for i in range(len(fs3s))]  # 阵风系数
-    return tur_intensity, gustiness_factor
+    return [tur_intensity, gustiness_factor]
 
 
 if __name__ == "__main__":
@@ -160,7 +197,8 @@ if __name__ == "__main__":
     t_start_list = [2021, 12, 25, 17, 0, 0]
     t_end_list = [2021, 12, 26, 5, 10, 0]
     t_list, fsh, fsk, alpha, beta = wind_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq=1)
-    fs2, fs10, fsp, fsstd = wind_stats(fsk, sample_frq=1)
+    fs2, fs10, fsp, fsstd, fsmax, fs2max, fs10max, fspmax, fsstdmax  = wind_par(fsk, sample_frq=1)
+
     freqs, abs_fy = wind_spectrum(fsk, alpha, beta, sample_frq=1)
     wl, zf = turbulence(fsk, alpha, beta, sample_frq=1)
     fig = plt.figure(figsize=(30, 12))

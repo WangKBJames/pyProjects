@@ -2,6 +2,9 @@
 import numpy as np
 import scipy.interpolate as spi
 
+'''
+
+'''
 
 # def get_range(x, data_x, frac):
 #     '''
@@ -35,7 +38,10 @@ def get_range(x, data_x, frac):
     :return: np.array
     '''
     x_ind = np.argwhere(data_x == x)[0][0]
-    half_len_w = int(np.floor((data_x.shape[0] * frac) / 2))
+    if frac >= 1:
+        half_len_w = frac//2
+    else:
+        half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
     len_x_list = 2 * half_len_w + 1
     if (x_ind - half_len_w) < 0:
         x_list = data_x[0:len_x_list]
@@ -149,7 +155,10 @@ def rloess(data_x, data_y, frac, step=1, iters=2):
     :return:
     '''
     # data_y_hat = np.ones_like(data_y)
-    half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
+    if frac >= 1:
+        half_len_w = frac//2
+    else:
+        half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
     data_x_step = data_x[0::step]
     if data_x_step[-1] != data_x[-1]:
         data_x_step = np.append(data_x_step, data_x[-1])
@@ -1254,6 +1263,42 @@ def isoutlier(data_y, data_y_hat, rate_threshould):
             y_norm_back[margin_i:margin_j_p] = out_data_back
     return y_norm_back
 
+
+def data_process(ydata, sensor_type, fs):
+    '''
+        数据预处理，图2纵坐标，横坐标为时间
+    :param ydata: float[] 待处理数据（不小于一天数据），图1纵坐标，横坐标为时间
+    :param sensor_type: float 数据类型：GPS挠度:1; WY:2; JY:3;
+    :param fs: float 数据采样频率
+    :return:
+        out_data: float[] 处理后的数据
+    '''
+
+    if type(ydata) is not np.ndarray:
+        ydata = np.array(ydata, dtype='float')
+    ydata = ydata - np.nanmean(ydata)
+    ydata[np.isnan(ydata)] = np.nanmean(ydata)
+    if sensor_type == 1:
+        frac = int(2000)
+        step = int(2000)
+        rate_threshould = 8
+    elif sensor_type == 2:
+        frac = int(2000)
+        step = int(2000)
+        rate_threshould = 3
+    elif sensor_type == 3:
+        frac = int(12)
+        step = int(12)
+        rate_threshould = 1.5
+    else:
+        frac = np.floor(1800*fs)
+        step = np.floor(1800*fs)
+        rate_threshould = 1
+    y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
+    out_data = isoutlier(ydata, y_hat, rate_threshould)
+    return out_data.tolist()
+
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import statsmodels.api as sm
@@ -1316,7 +1361,7 @@ if __name__ == "__main__":
         # ax2.plot(data_x, data_y - data_y_hat, 'b')
         plt.show()
 
-    if True:
+    if False:
         from dataReader import gnss_data
 
         main_path = r"D:\pytestdata"
@@ -1350,6 +1395,48 @@ if __name__ == "__main__":
         # plt.xticks(rotation=90)
         ax1.plot(x, nd-nd_hat, 'b')
         ax1.plot(x, nd_back, 'r')
+        # ax1.plot(x, nd_hat)
+        # ax.plot(data_x, data_y_hat2.T[1])
+        # ax2 = fig.add_subplot(212)  # 定义子图
+        # # plt.xticks(rotation=90)
+        # ax2.plot(data_x, data_y - data_y_hat, 'b')
+        plt.show()
+    if True:
+        from dataReader import gnss_data
+
+        main_path = r"D:\pytestdata"
+        sensor_num = "BD080101"
+        t_start_list = [2021, 8, 22, 0, 0, 0]
+        t_end_list = [2021, 8, 23, 23, 0, 0]
+        t_list, data = gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
+        nd = data[2]*100
+        # nd = np.array(data[2], dtype='float') * 100
+        # nd = nd - np.nanmean(nd)
+        # nd[np.isnan(nd)] = np.nanmean(nd)
+        # x = np.arange(len(nd))
+        # nd_hat, w_list = rloess(x, nd, frac=0.05, step=2000, iters=4)
+        # rate_threshould = 3.0
+        # nd_back = isoutlier(nd, nd_hat, rate_threshould)
+        # nd_back = isoutlier(nd_back, np.zeros_like(nd_back), rate_threshould)
+
+
+        # dnd_represent = []
+        # for i in x:
+        #     if np.abs(dnd[i]) > 10:
+        #         dnd_represent.append(dnd[i])
+        #     else:
+        #         dnd_represent.append(0.0)
+        # dnd_represent = np.array(dnd_represent).cumsum()
+        nd_back = data_process(nd, 1, 1)
+
+        fig = plt.figure(figsize=(12, 8))  # 定义图并设置画板尺寸
+        fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+        # fig.tight_layout()                                                    # 调整整体空白
+        # plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
+        ax1 = fig.add_subplot(111)  # 定义子图
+        # plt.xticks(rotation=90)
+        # ax1.plot(nd, 'b')
+        ax1.plot(nd_back, 'r')
         # ax1.plot(x, nd_hat)
         # ax.plot(data_x, data_y_hat2.T[1])
         # ax2 = fig.add_subplot(212)  # 定义子图

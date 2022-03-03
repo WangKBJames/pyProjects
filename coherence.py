@@ -20,6 +20,13 @@ cxymean：float，相干函数平均值
 
 
 def coherence(x_signal, y_signal, sample_frequency):
+    '''
+
+    :param x_signal:
+    :param y_signal:
+    :param sample_frequency:
+    :return:
+    '''
     if type(x_signal) is not np.ndarray:
         x_signal = np.array(x_signal, dtype='float')
     x_signal[np.isnan(x_signal)] = np.nanmean(x_signal)
@@ -27,7 +34,7 @@ def coherence(x_signal, y_signal, sample_frequency):
         y_signal = np.array(y_signal, dtype='float')
     y_signal[np.isnan(y_signal)] = np.nanmean(y_signal)
     frq, cxy = signal.coherence(x_signal, y_signal, sample_frequency, nperseg=1024)
-    return frq.tolist(), cxy.tolist(), np.float(cxy.max()), np.float(cxy.min()), np.float(cxy.mean())
+    return [frq.tolist(), cxy.tolist(), np.float(cxy.max()), np.float(cxy.min()), np.float(cxy.mean())]
 
 
 if __name__ == "__main__":

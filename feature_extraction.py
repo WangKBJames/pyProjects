@@ -25,7 +25,7 @@ def spectrum(y_signal, fs):
     abs_fy = np.abs(fft_y) / n * 2
     freqs = np.linspace(0, fs / 2, int(n / 2 + 1))
     frqp = freqs[np.argmax(abs_fy)]
-    return freqs.tolist(), abs_fy.tolist(), float(frqp)
+    return [freqs.tolist(), abs_fy.tolist(), float(frqp)]
 
 
 # hypothesis function
@@ -55,7 +55,7 @@ def cumulation(y_signal, fs):
     a, b = fit_ret[0]
     y_fit = hypothesis_func([a, b], t)
     corr = pearsonr(y_fit, y_cum)
-    return y_cum.tolist(), y_fit.tolist(), float(a), float(b), float(corr[0])
+    return [y_cum.tolist(), y_fit.tolist(), float(a), float(b), float(corr[0])]
 
 
 if __name__ == "__main__":
