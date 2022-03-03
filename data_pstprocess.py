@@ -4,10 +4,10 @@ Aim：据极值、分位数、均值（k线图）、均方根（折线图）
 """
 import numpy as np
 # from scipy import signal
-from scipy.optimize import leastsq
+# from scipy.optimize import leastsq
 # from scipy.optimize import curve_fit
-import matplotlib.pyplot as plt
-from scipy.stats import pearsonr
+# import matplotlib.pyplot as plt
+# from scipy.stats import pearsonr
 import scipy.interpolate as spi
 import math
 
@@ -48,7 +48,61 @@ def movstd(y_signal, win_n):
     return y_std.tolist()
 
 
-def extreme(ydata,fs):
+def movmax(y_signal, win_n):
+    '''
+
+    :param y_signal:
+    :param win_n:
+    :return:
+    '''
+    y_max = np.array([])
+    for i in range(0, len(y_signal)):
+        if i < int(win_n // 2):
+            y_max = np.append(y_max, np.nanmax(y_signal[:i + int(math.ceil(int(win_n) / 2))]))
+        elif i >= len(y_signal) - int(math.floor(win_n / 2)):
+            y_max = np.append(y_max, np.nanmax(y_signal[i - int(math.floor(win_n / 2)):]))
+        else:
+            y_max = np.append(y_max, np.nanmax(y_signal[i - math.floor(win_n / 2):i + int(math.ceil(win_n / 2))]))
+    return y_max.tolist()
+
+
+def movmin(y_signal, win_n):
+    '''
+
+    :param y_signal:
+    :param win_n:
+    :return:
+    '''
+    y_min = np.array([])
+    for i in range(0, len(y_signal)):
+        if i < int(win_n // 2):
+            y_min = np.append(y_min, np.nanmin(y_signal[:i + int(math.ceil(int(win_n) / 2))]))
+        elif i >= len(y_signal) - int(math.floor(win_n / 2)):
+            y_min = np.append(y_min, np.nanmin(y_signal[i - int(math.floor(win_n / 2)):]))
+        else:
+            y_min = np.append(y_min, np.nanmin(y_signal[i - math.floor(win_n / 2):i + int(math.ceil(win_n / 2))]))
+    return y_min.tolist()
+
+
+def movquantile(y_signal, win_n, frac):
+    '''
+
+    :param y_signal:
+    :param win_n:
+    :return:
+    '''
+    y_frac = np.array([])
+    for i in range(0, len(y_signal)):
+        if i < int(win_n // 2):
+            y_frac = np.append(y_frac, np.quantile(y_signal[:i + int(math.ceil(int(win_n) / 2))], frac))
+        elif i >= len(y_signal) - int(math.floor(win_n / 2)):
+            y_frac = np.append(y_frac, np.quantile(y_signal[i - int(math.floor(win_n / 2)):], frac))
+        else:
+            y_frac = np.append(y_frac, np.quantile(y_signal[i - math.floor(win_n / 2):i + int(math.ceil(win_n / 2))], frac))
+    return y_frac.tolist()
+
+
+def extreme(ydata, fs):
     '''
     复选框选择”极值时“
     :param ydata: float[] 输入特征数据(图1的y轴，x轴为时间）
@@ -59,10 +113,14 @@ def extreme(ydata,fs):
     list[2]:  y_mean: float[], 均值序列， 图2 y轴，x轴为时间
     '''
 
-    pass
+    win_n = int(fs * 600)
+    y_max = movmax(ydata, win_n)
+    y_min = movmin(ydata, win_n)
+    y_mean = movmean(ydata, win_n)
+    return [y_max, y_min, y_mean]
 
 
-def data_quantile(ydata,fs):
+def data_quantile(ydata, fs):
     '''
     复选框选择“分位数”时
     :param ydata: float[] 输入特征数据
@@ -72,7 +130,13 @@ def data_quantile(ydata,fs):
     list[1]: 0.5 分位数序列，list[0]:  y_75: float[],图2 y轴，x轴为时间
     list[2]: 0.25 分位数序列，list[1]: y_25: float[],图2 y轴，x轴为时间
     '''
-    pass
+
+    win_n = int(fs * 600)
+    y_75 = movquantile(ydata, win_n, 0.75)
+    y_50 = movquantile(ydata, win_n, 0.5)
+    y_25 = movquantile(ydata, win_n, 0.25)
+    return [y_75, y_50, y_25]
+
 
 def data_std(ydata,fs):
     '''
@@ -82,9 +146,12 @@ def data_std(ydata,fs):
     :return:
     均方根， float[]，图2 y轴，x轴为时间
     '''
-    pass
+    win_n = int(fs * 600)
+    y_std = movstd(ydata, win_n)
+    return y_std
 
-def data_untrend(ydata,fs):
+
+def data_untrend(ydata, fs):
     '''
     复选框选择“去趋势”时
     :param ydata: float[] 输入特征数据
@@ -92,9 +159,22 @@ def data_untrend(ydata,fs):
     :return:
     去趋势数据序列， float[]，图2 y轴，x轴为时间
     '''
-    pass
 
-
+    if type(ydata) is not np.ndarray:
+        tmp_1 = np.array(ydata, dtype='float')
+    if fs == 1:
+        step = 2000
+        frac = 7200
+    elif fs < 1:
+        step = 6
+        frac = 12
+    elif fs > 1:
+        step = 4000
+        frac = 7200
+    xdata = np.arange(len(ydata))
+    y_hat, y_w = rloess(xdata, ydata, frac, step, iters=4)
+    y_untrd = ydata - y_hat
+    return y_untrd
 
 
 def get_range(x, data_x, frac):
@@ -211,7 +291,7 @@ def rlowess(data_x, data_y, frac, iters=2):
     return data_y_hat
 
 
-def rloess(data_x, data_y, frac, step=1, iters=2):
+def rloess(data_x, data_y, frac, step=1, iters=4):
     '''
     鲁棒性的加权回归：
     Cleveland, W.S. (1979) “Robust Locally Weighted Regression and Smoothing Scatterplots”. Journal of the American Statistical Association 74 (368): 829-836.
@@ -244,3 +324,29 @@ def rloess(data_x, data_y, frac, step=1, iters=2):
     data_y_hat_rep = spi.splrep(data_x_step, data_y_hat_step, k=2)
     data_y_hat = spi.splev(data_x, data_y_hat_rep)
     return data_y_hat, w_list
+
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    ydata = np.sin(0.0001*np.arange(72000)) + np.random.randn(72000)
+    # y_max, y_min, y_mean = extreme(ydata, 1)
+    # plt.plot(y_max)
+    # plt.plot(y_min)
+    # plt.plot(y_mean)
+    # plt.show()
+
+    y_75, y_50, y_25 = data_quantile(ydata, 1)
+    plt.plot(y_75)
+    plt.plot(y_50)
+    plt.plot(y_25)
+    plt.show()
+
+    # y_std = data_std(ydata, 1)
+    # plt.plot(y_std)
+    # plt.show()
+
+    # y_untrd = data_untrend(ydata, 1)
+    # plt.plot(y_untrd)
+    # plt.plot(ydata)
+    # plt.show()

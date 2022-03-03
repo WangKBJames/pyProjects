@@ -1279,16 +1279,16 @@ def data_process(ydata, sensor_type, fs):
     ydata = ydata - np.nanmean(ydata)
     ydata[np.isnan(ydata)] = np.nanmean(ydata)
     if sensor_type == 1:
-        frac = int(2000)
+        frac = int(14400)
         step = int(2000)
         rate_threshould = 8
     elif sensor_type == 2:
-        frac = int(2000)
+        frac = int(3600)
         step = int(2000)
         rate_threshould = 3
     elif sensor_type == 3:
         frac = int(12)
-        step = int(12)
+        step = int(6)
         rate_threshould = 1.5
     else:
         frac = np.floor(1800*fs)
@@ -1407,26 +1407,13 @@ if __name__ == "__main__":
         main_path = r"D:\pytestdata"
         sensor_num = "BD080101"
         t_start_list = [2021, 8, 22, 0, 0, 0]
-        t_end_list = [2021, 8, 23, 23, 0, 0]
+        t_end_list = [2021, 8, 28, 2, 0, 0]
         t_list, data = gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
         nd = data[2]*100
-        # nd = np.array(data[2], dtype='float') * 100
-        # nd = nd - np.nanmean(nd)
-        # nd[np.isnan(nd)] = np.nanmean(nd)
-        # x = np.arange(len(nd))
-        # nd_hat, w_list = rloess(x, nd, frac=0.05, step=2000, iters=4)
-        # rate_threshould = 3.0
-        # nd_back = isoutlier(nd, nd_hat, rate_threshould)
-        # nd_back = isoutlier(nd_back, np.zeros_like(nd_back), rate_threshould)
+        nd = nd[0:3600*24*4]
+        nd = nd - np.nanmean(nd)
+        nd = nd*100
 
-
-        # dnd_represent = []
-        # for i in x:
-        #     if np.abs(dnd[i]) > 10:
-        #         dnd_represent.append(dnd[i])
-        #     else:
-        #         dnd_represent.append(0.0)
-        # dnd_represent = np.array(dnd_represent).cumsum()
         nd_back = data_process(nd, 1, 1)
 
         fig = plt.figure(figsize=(12, 8))  # 定义图并设置画板尺寸
