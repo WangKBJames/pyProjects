@@ -2,31 +2,8 @@
 import numpy as np
 import scipy.interpolate as spi
 
-'''
 
-'''
-
-# def get_range(x, data_x, frac):
-#     '''
-#     以x为中心，找着frac的比例截取数据
-#     :param x: 数据中心
-#     :param data_x: 数据x
-#     :param frac: 截取比例
-#     :return: np.array
-#     '''
-#     x_ind = np.argwhere(data_x == x)[0][0]
-#     half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
-#     len_x_list = 2 * half_len_w + 1
-#     if (x_ind - half_len_w) < 0:
-#         x_list = data_x[0:x_ind + half_len_w + 1]
-#         x_list = np.insert(x_list, 0, np.flipud(x_list)[0:half_len_w - x_ind])
-#         return x_list
-#     if (x_ind + half_len_w) > len(data_x):
-#         x_list = data_x[x_ind - half_len_w:]
-#         x_list = np.insert(x_list, len(x_list), np.flipud(x_list[0:len_x_list - len(x_list)]))
-#         return x_list
-#     x_list = data_x[x_ind - half_len_w:x_ind + half_len_w + 1]
-#     return x_list
+main_path = r".\anomaly_detection\\"
 
 
 def get_range(x, data_x, frac):
@@ -1297,6 +1274,10 @@ def data_process(ydata, sensor_type, fs):
     y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
     out_data = isoutlier(ydata, y_hat, rate_threshould)
     return out_data.tolist()
+
+
+def process():
+    pass
 
 
 if __name__ == "__main__":

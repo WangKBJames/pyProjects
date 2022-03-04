@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
 import numpy as np
+
+main_path = r".\mac_compare\\"
 
 
 def mac_compare(mode_order, mode_select_1, mode_select_2):
@@ -58,13 +61,26 @@ def mac_compare(mode_order, mode_select_1, mode_select_2):
               "基频变化：{7:.1f}%".format(
         shape[mode_order - 1], f1, d1, shape[mode_order - 1], f2, d2, mac[mode_order - 1], np.abs((f2 - f1) / f1 * 100)
     )
-    with open(r'I:\JSTI\算法模块配置\utils\mac\shuoming.txt', 'w') as file:
-    # with open(r'.\mac\shuoming.txt', 'w') as file:
+    # with open(r'I:\JSTI\算法模块配置\utils\mac\shuoming.txt', 'w') as file:
+    with open(main_path + r'output\shuoming.txt', 'w') as file:
         file.write(doc_str)
 
-    fig1 = plt.imread(r".\mac\modeCmp\m{0：d}.jpg".format(mode_order))
+    fig1 = plt.imread(main_path + r"modeCmp\m{0:d}.jpg".format(mode_order))
+    fig = plt.figure(figsize=(24, 10))
+    plt.imshow(fig1)
+    plt.tight_layout()
+    plt.axis("off")
+    plt.text(1000, 100, "MAC:{0:.3f}".format(mac[mode_order - 1]), fontsize=30)
+    plt.savefig(main_path + r"output\fig1.jpg")
+    return mac
+
+
+def process():
+    mode_par = np.loadtxt(main_path + r"input\shuru.txt", dtype='float')
+    mac = mac_compare(int(mode_par[0]), int(mode_par[1]), int(mode_par[2]))
+    np.savetxt(main_path + r"output\fig2_y_1.txt", mac)
     return
 
 
 if __name__ == "__main__":
-    mac_compare(3, 1, 2)
+    process()

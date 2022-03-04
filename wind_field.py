@@ -2,14 +2,15 @@
 
 import numpy as np
 import math
+
 # import pandas as pd
 # from scipy.fftpack import fft
 # from scipy.optimize import leastsq
-import matplotlib.pyplot as plt
-
-
+# import matplotlib.pyplot as plt
 # from scipy.optimize import leastsq
 # from scipy.stats import pearsonr
+
+main_path = r".\wind_field\\"
 
 
 def movmean(y_signal, win_n):
@@ -63,7 +64,6 @@ def wind_stats(wind_velocity, sample_frq=1):
     return wmean_2min, wmean_10min, wpulse, wstd_10min
 
 
-
 def wind_par(wind_velocity, sample_frq=1):
     '''
     计算风场参数，图1 y轴
@@ -83,10 +83,11 @@ def wind_par(wind_velocity, sample_frq=1):
     '''
     wmean_2min, wmean_10min, wpulse, wstd_10min = wind_stats(wind_velocity, sample_frq=1)
 
-    return [wmean_2min, wmean_10min, wpulse, wstd_10min, float(np.max(wind_velocity)), float(np.max(wmean_2min)), float(np.max(wmean_10min)), float(np.max(wstd_10min)), float(np.nanmean(wind_velocity))]
+    return [wmean_2min, wmean_10min, wpulse, wstd_10min, float(np.max(wind_velocity)), float(np.max(wmean_2min)),
+            float(np.max(wmean_10min)), float(np.max(wstd_10min)), float(np.nanmean(wind_velocity))]
+
 
 def attack_angle(angle):
-
     '''
     风攻角计算，图2
     :param angle: float[]  风竖向角数据（风数据最后一列）
@@ -187,58 +188,137 @@ def turbulence(wind_velocity, h_angle, attack_angle, sample_frq=1):
     return [tur_intensity, gustiness_factor]
 
 
+def wind_scale(fs):
+    '''
+    计算风力等级
+    :param fs:
+    :return:
+    '''
+    if 0.0 <= fs <= 0.25:
+        N = 0
+    elif 0.25 < fs <= 1.55:
+        N = 1
+    elif 1.55 < fs <= 3.35:
+        N = 2
+    elif 3.35 < fs <= 5.45:
+        N = 3
+    elif 5.45 < fs <= 7.95:
+        N = 4
+    elif 7.95 < fs <= 10.75:
+        N = 5
+    elif 10.75 < fs <= 13.85:
+        N = 6
+    elif 13.85 < fs <= 17.15:
+        N = 7
+    elif 17.15 < fs <= 20.75:
+        N = 8
+    elif 20.75 < fs <= 24.45:
+        N = 9
+    elif 24.45 < fs <= 28.45:
+        N = 10
+    elif 28.45 < fs <= 32.65:
+        N = 11
+    elif 32.65 < fs <= 36.95:
+        N = 12  # 强台风  一级飓风
+    elif 36.95 < fs <= 41.45:
+        N = 13  # 强台风  一级飓风
+    elif 41.45 < fs <= 46.15:
+        N = 14  # 强台风  二级飓风
+    elif 46.15 < fs <= 50.95:
+        N = 15  # 强台风  三级飓风
+    elif 50.95 < fs <= 56.05:
+        N = 16  # 超强台风  三级飓风
+    elif 56.05 < fs <= 61.25:
+        N = 17  # 超强台风  四级飓风
+    elif 61.25 < fs <= 69.4:
+        N = 18  # 超强台风 四级飓风
+    elif fs > 69.4:
+        N = 19  # 超级台风 五级飓风
+    return N
+
+
+def process():
+    wind_velocity = np.loadtxt(main_path + r"input\fengsu.txt", dtype='float')
+    h_angle = np.loadtxt(main_path + r"input\shuipingjiao.txt", dtype='float')
+    attack_angle = np.loadtxt(main_path + r"input\shuzhijiao.txt", dtype='float')
+    wmean_2min, wmean_10min, wpulse, wstd_10min, wind_max, wmean_2min_max, wmean_10min_max, wstd_10min_max, wmean = wind_par(
+        wind_velocity, sample_frq=1)
+    # attack_angle = attack_angle(attack_angle)
+    freqs, abs_fy = wind_spectrum(wind_velocity, h_angle, attack_angle, sample_frq=1)
+    tur_intensity, gustiness_factor = turbulence(wind_velocity, h_angle, attack_angle, sample_frq=1)
+    w_scale = wind_scale(wmean_2min_max)
+    np.savetxt(main_path + r"output\fig1_y_1.txt", wind_velocity)
+    np.savetxt(main_path + r"output\fig1_y_2.txt", wmean_2min)
+    np.savetxt(main_path + r"output\fig1_y_3.txt", wmean_10min)
+    np.savetxt(main_path + r"output\fig1_y_4.txt", wpulse)
+    np.savetxt(main_path + r"output\fig1_y_5.txt", wstd_10min)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", attack_angle)
+    np.savetxt(main_path + r"output\fig3_x.txt", freqs)
+    np.savetxt(main_path + r"output\fig3_y_1.txt", abs_fy)
+    np.savetxt(main_path + r"output\fig4_y_1.txt", tur_intensity)
+    np.savetxt(main_path + r"output\fig5_y_1.txt", gustiness_factor)
+    doc_str = "瞬时风速极值：{0:.2f}m/s\n" \
+              "2分钟风速极值（风力）：{1:.2f}m/s({2:d}级风)\n" \
+              "10分钟风速极值：{3:.2f}m/s\n" \
+              "10分钟均方根极值：{4:.2f}m/s\n" \
+              "风速均值：{5:.2f}m/s".format(wind_max, wmean_2min_max, w_scale, wmean_10min_max, wstd_10min_max, wmean)
+    with open(main_path + r"output\shuoming.txt", "w") as f:
+        f.write(doc_str)
+    return
+
+
 if __name__ == "__main__":
-    from dataReader import wind_data
-    import matplotlib.dates as mdates
+    # from dataReader import wind_data
+    # import matplotlib.dates as mdates
 
-    main_path = r"I:\JSTI\数据\江阴\江阴数据\FS"
-    sensor_num = "FS060101"
-    sample_frq = 1
-    t_start_list = [2021, 12, 25, 17, 0, 0]
-    t_end_list = [2021, 12, 26, 5, 10, 0]
-    t_list, fsh, fsk, alpha, beta = wind_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq=1)
-    fs2, fs10, fsp, fsstd, fsmax, fs2max, fs10max, fspmax, fsstdmax  = wind_par(fsk, sample_frq=1)
-
-    freqs, abs_fy = wind_spectrum(fsk, alpha, beta, sample_frq=1)
-    wl, zf = turbulence(fsk, alpha, beta, sample_frq=1)
-    fig = plt.figure(figsize=(30, 12))
-    fig.tight_layout()
-    ax1 = fig.add_subplot(221)
-    plt.xticks(rotation=45)
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
-    ax1.plot(t_list, fsk, color='b', label='real-time')
-    ax1.plot(t_list, fs2, color='r', label='2 minuts mean')
-    ax1.plot(t_list, fs10, color='k', label='10 minuts mean')
-    ax1.plot(t_list, fsp, color='m', label='pulse velocity')
-    ax1.plot(t_list, fsstd, color='k', label='standard deviation')
-    plt.xlabel("time")
-    plt.ylabel("wind velocity(m/s)")
-    plt.legend(loc='lower right')
-    ax2 = fig.add_subplot(222)
-    ax2.plot(freqs, abs_fy, color='b', label='wind_spectrum')
-    plt.yscale('log')
-    plt.xscale('log')
-    plt.xlabel('frequency(Hz)')
-    plt.ylabel('amplitude')
-    plt.title('wind')
-    plt.legend(loc='lower right')
-    ax3 = fig.add_subplot(223)
-    plt.xticks(rotation=45)
-    ax3.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
-    ax3.plot(t_list, wl, color='b', label='real-time')
-    plt.xlabel("time")
-    plt.ylabel("turbulence intensity")
-    ax4 = fig.add_subplot(224)
-    plt.xticks(rotation=45)
-    ax4.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
-    ax4.plot(t_list, zf, color='b', label='real-time')
-    plt.xlabel("time")
-    plt.ylabel("gustiness factor")
+    # main_path = r"I:\JSTI\数据\江阴\江阴数据\FS"
+    # sensor_num = "FS060101"
+    # sample_frq = 1
+    # t_start_list = [2021, 12, 25, 17, 0, 0]
+    # t_end_list = [2021, 12, 26, 5, 10, 0]
+    # t_list, fsh, fsk, alpha, beta = wind_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq=1)
+    # fs2, fs10, fsp, fsstd, fsmax, fs2max, fs10max, fspmax, fsstdmax = wind_par(fsk, sample_frq=1)
+    #
+    # freqs, abs_fy = wind_spectrum(fsk, alpha, beta, sample_frq=1)
+    # wl, zf = turbulence(fsk, alpha, beta, sample_frq=1)
+    # fig = plt.figure(figsize=(30, 12))
+    # fig.tight_layout()
+    # ax1 = fig.add_subplot(221)
+    # plt.xticks(rotation=45)
+    # ax1.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
+    # ax1.plot(t_list, fsk, color='b', label='real-time')
+    # ax1.plot(t_list, fs2, color='r', label='2 minuts mean')
+    # ax1.plot(t_list, fs10, color='k', label='10 minuts mean')
+    # ax1.plot(t_list, fsp, color='m', label='pulse velocity')
+    # ax1.plot(t_list, fsstd, color='k', label='standard deviation')
+    # plt.xlabel("time")
+    # plt.ylabel("wind velocity(m/s)")
+    # plt.legend(loc='lower right')
+    # ax2 = fig.add_subplot(222)
+    # ax2.plot(freqs, abs_fy, color='b', label='wind_spectrum')
+    # plt.yscale('log')
+    # plt.xscale('log')
+    # plt.xlabel('frequency(Hz)')
+    # plt.ylabel('amplitude')
+    # plt.title('wind')
+    # plt.legend(loc='lower right')
+    # ax3 = fig.add_subplot(223)
+    # plt.xticks(rotation=45)
+    # ax3.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
+    # ax3.plot(t_list, wl, color='b', label='real-time')
+    # plt.xlabel("time")
+    # plt.ylabel("turbulence intensity")
+    # ax4 = fig.add_subplot(224)
+    # plt.xticks(rotation=45)
+    # ax4.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
+    # ax4.plot(t_list, zf, color='b', label='real-time')
+    # plt.xlabel("time")
+    # plt.ylabel("gustiness factor")
 
     # plt.scatter(x_signal, y_signal, color='b', label='train set')
     # plt.plot(fsk, color='r', label='wind_spectrum')
     # plt.legend(loc='lower right')  # label面板放到figure的右下角
-    plt.show()
+    # plt.show()
     # plt.figure(figsize=(8, 6))  # 指定图像比例： 8：6
     # plt.title('wind_spectrum')
     # # plt.scatter(x_signal, y_signal, color='b', label='train set')
@@ -274,3 +354,11 @@ if __name__ == "__main__":
     # plt.plot(freqs, abs_fy, color='r', label='wind_spectrum')
     # plt.legend(loc='lower right')  # label面板放到figure的右下角
     # plt.show()
+
+    # wind_velocity = 12 * np.abs(np.random.randn(50000))
+    # h_angle = 360 * np.random.random(50000)
+    # attack_angle = 10 * (np.random.random(50000) - 0.5)
+    # np.savetxt(r".\wind_field\input\fengsu.txt", wind_velocity)
+    # np.savetxt(r".\wind_field\input\shuipingjiao.txt", h_angle)
+    # np.savetxt(r".\wind_field\input\shuzhijiao.txt", attack_angle)
+    process()
