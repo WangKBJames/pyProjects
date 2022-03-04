@@ -1256,20 +1256,20 @@ def data_process(ydata, sensor_type, fs):
     ydata = ydata - np.nanmean(ydata)
     ydata[np.isnan(ydata)] = np.nanmean(ydata)
     if sensor_type == 1:
-        frac = int(14400)
-        step = int(2000)
+        frac = np.min([int(0.2 * len(ydata)), int(28800)])
+        step = np.min([int(0.01 * len(ydata)), int(2000)])
         rate_threshould = 8
     elif sensor_type == 2:
-        frac = int(3600)
-        step = int(2000)
+        frac = np.min([int(0.2 * len(ydata)), int(3600)])
+        step = np.min([int(0.01 * len(ydata)), int(2000)])
         rate_threshould = 3
     elif sensor_type == 3:
-        frac = int(12)
-        step = int(6)
+        frac = np.min([int(0.2 * len(ydata)), int(24)])
+        step = np.min([int(0.01 * len(ydata)), int(6)])
         rate_threshould = 1.5
     else:
-        frac = np.floor(1800*fs)
-        step = np.floor(1800*fs)
+        frac = np.min([int(0.2 * len(ydata)), np.floor(1800*fs)])
+        step = np.min([int(0.01 * len(ydata)), np.floor(900*fs)])
         rate_threshould = 1
     y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
     out_data = isoutlier(ydata, y_hat, rate_threshould)
@@ -1277,7 +1277,13 @@ def data_process(ydata, sensor_type, fs):
 
 
 def process():
-    pass
+    par = np.loadtxt(main_path + r"input\par.txt", dtype='float')
+    sensor_type = par[0]
+    fs = par[1]
+    data = np.loadtxt(main_path + r"input\shuju.txt", dtype='float')
+    out_data = data_process(data, sensor_type, fs)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", out_data)
+    return
 
 
 if __name__ == "__main__":
@@ -1385,29 +1391,21 @@ if __name__ == "__main__":
     if True:
         from dataReader import gnss_data
 
-        main_path = r"D:\pytestdata"
+        path = r"D:\pytestdata"
         sensor_num = "BD080101"
         t_start_list = [2021, 8, 22, 0, 0, 0]
         t_end_list = [2021, 8, 28, 2, 0, 0]
-        t_list, data = gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
+        t_list, data = gnss_data(path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
         nd = data[2]*100
         nd = nd[0:3600*24*4]
         nd = nd - np.nanmean(nd)
         nd = nd*100
+        # np.savetxt(main_path + r"input\shuju.txt", nd)
+        # process()
 
         nd_back = data_process(nd, 1, 1)
-
         fig = plt.figure(figsize=(12, 8))  # 定义图并设置画板尺寸
         fig.set(alpha=0.2)  # 设定图表颜色alpha参数
-        # fig.tight_layout()                                                    # 调整整体空白
-        # plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
         ax1 = fig.add_subplot(111)  # 定义子图
-        # plt.xticks(rotation=90)
-        # ax1.plot(nd, 'b')
         ax1.plot(nd_back, 'r')
-        # ax1.plot(x, nd_hat)
-        # ax.plot(data_x, data_y_hat2.T[1])
-        # ax2 = fig.add_subplot(212)  # 定义子图
-        # # plt.xticks(rotation=90)
-        # ax2.plot(data_x, data_y - data_y_hat, 'b')
         plt.show()
