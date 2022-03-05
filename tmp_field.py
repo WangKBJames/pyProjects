@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+main_path = r".\tmp_field\\"
+
 
 def tmp_gradient(tmp_1, tmp_2, dis=5):
     '''
@@ -24,12 +26,25 @@ def tmp_gradient(tmp_1, tmp_2, dis=5):
     grad_max = np.max(np.abs(grad))
     doc_str = "温度均值：{0:.2f}℃\n最高温度：{1:.2f}℃\n最低温度：{2:.2f}℃\n最大温差：" \
               "{3:.2f}℃\n最大温度梯度：{4:.2f}℃/m".format(tmp_mean, tmp_max, tmp_min,
-                                                     d_tmp_max, grad_max)
+                                                   d_tmp_max, grad_max)
     return [grad, doc_str]
 
 
+def process():
+    data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
+    data_2 = np.loadtxt(main_path + r"input\shuju2.txt", dtype='float')
+    grad, doc_str = tmp_gradient(data_1, data_2, dis=5)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", grad)
+    with open(main_path + r"output\shuoming.txt", "w") as f:
+        f.write(doc_str)
+    return
+
+
 if __name__ == "__main__":
-    tmp_1 = np.random.randn(20)
-    tmp_2 = np.random.randn(20)
-    grad, doc_str = tmp_gradient(tmp_1, tmp_2, dis=5)
-    print(doc_str)
+    tmp_1 = np.random.randn(40)
+    tmp_2 = np.random.randn(40)
+    # grad, doc_str = tmp_gradient(tmp_1, tmp_2, dis=5)
+
+    np.savetxt(main_path + r"input\shuju1.txt", tmp_1)
+    np.savetxt(main_path + r"input\shuju2.txt", tmp_2)
+    process()
