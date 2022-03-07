@@ -11,6 +11,7 @@ import numpy as np
 import scipy.interpolate as spi
 import math
 
+main_path = r".\data_pstprocess\\"
 
 def movmean(y_signal, win_n):
     '''
@@ -163,14 +164,14 @@ def data_untrend(ydata, fs):
     if type(ydata) is not np.ndarray:
         tmp_1 = np.array(ydata, dtype='float')
     if fs == 1:
-        step = 2000
-        frac = 7200
+        frac = np.min([int(0.2 * len(ydata)), int(14400)])
+        step = np.min([int(0.05 * len(ydata)), int(2000)])
     elif fs < 1:
-        step = 6
-        frac = 12
+        frac = np.min([int(0.2 * len(ydata)), int(12)])
+        step = np.min([int(0.05 * len(ydata)), int(6)])
     elif fs > 1:
-        step = 4000
-        frac = 7200
+        frac = np.min([int(0.2 * len(ydata)), int(3600)])
+        step = np.min([int(0.05 * len(ydata)), int(2000)])
     xdata = np.arange(len(ydata))
     y_hat, y_w = rloess(xdata, ydata, frac, step, iters=4)
     y_untrd = ydata - y_hat
@@ -326,27 +327,63 @@ def rloess(data_x, data_y, frac, step=1, iters=4):
     return data_y_hat, w_list
 
 
+def process():
+    par = np.loadtxt(main_path + r"input\par.txt", dtype='float')
+    type_num = par[0]
+    fs = par[1]
+    data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
+    if type_num == 1:
+        y_max, y_min, y_mean = extreme(data_1, fs)
+        np.savetxt(main_path + r"output\fig2_y_1.txt", y_max)
+        np.savetxt(main_path + r"output\fig2_y_2.txt", y_min)
+        np.savetxt(main_path + r"output\fig2_y_3.txt", y_mean)
+    elif type_num == 2:
+        y_75, y_50, y_25 = data_quantile(data_1, fs)
+        np.savetxt(main_path + r"output\fig2_y_1.txt", y_75)
+        np.savetxt(main_path + r"output\fig2_y_2.txt", y_50)
+        np.savetxt(main_path + r"output\fig2_y_3.txt", y_25)
+    elif type_num == 3:
+        y_std = data_std(data_1, fs)
+        np.savetxt(main_path + r"output\fig2_y_1.txt", y_std)
+    elif type_num == 4:
+        y_untrd = data_untrend(data_1, fs)
+        np.savetxt(main_path + r"output\fig2_y_1.txt", y_untrd)
+    return
+
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-    ydata = np.sin(0.0001*np.arange(72000)) + np.random.randn(72000)
+    # import matplotlib.pyplot as plt
+    # ydata = np.sin(0.0001*np.arange(72000)) + np.random.randn(72000)
+
+    # np.savetxt(main_path + r"input\shuju1.txt", ydata)
     # y_max, y_min, y_mean = extreme(ydata, 1)
     # plt.plot(y_max)
     # plt.plot(y_min)
     # plt.plot(y_mean)
     # plt.show()
+    # process()
 
-    y_75, y_50, y_25 = data_quantile(ydata, 1)
-    plt.plot(y_75)
-    plt.plot(y_50)
-    plt.plot(y_25)
-    plt.show()
+    # np.savetxt(main_path + r"input\shuju1.txt", ydata)
+    # y_75, y_50, y_25 = data_quantile(ydata, 1)
+    # plt.plot(y_75)
+    # plt.plot(y_50)
+    # plt.plot(y_25)
+    # plt.show()
+    # process()
 
+    # np.savetxt(main_path + r"input\shuju1.txt", ydata)
     # y_std = data_std(ydata, 1)
     # plt.plot(y_std)
     # plt.show()
+    # process()
 
+    # np.savetxt(main_path + r"input\shuju1.txt", ydata)
     # y_untrd = data_untrend(ydata, 1)
     # plt.plot(y_untrd)
     # plt.plot(ydata)
     # plt.show()
+    process()
+
+
+
+

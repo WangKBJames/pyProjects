@@ -9,6 +9,7 @@ from scipy.optimize import leastsq
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
 
+main_path = r".\correlation\\"
 
 # hypothesis function
 def hypothesis_func(w, x):
@@ -88,17 +89,36 @@ def correlation(x_signal, y_signal):
     return [x_fit.tolist(), y_fit.tolist(), float(a), float(b), float(corr[0])]
 
 
-if __name__ == "__main__":
-    # train set
-    x_signal = np.array([8.19, np.nan, 6.39, 8.71, 4.7, 2.66, 3.78])
-    y_signal = np.array([7.01, 2.78, 6.47, 6.71, 4.1, np.nan, 4.05]) * 0.01
-    x_fit, y_fit, a, b, corr = correlation(x_signal, y_signal)
+def process():
+    data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
+    data_2 = np.loadtxt(main_path + r"input\shuju2.txt", dtype='float')
+    x_fit, y_fit, a, b, corr = correlation(data_1, data_2)
+    np.savetxt(main_path + r"output\fig2_x_1.txt", data_1)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", data_2)
+    np.savetxt(main_path + r"output\fig2_x_2.txt", x_fit)
+    np.savetxt(main_path + r"output\fig2_y_2.txt", y_fit)
+    doc_str = "函数形式：{0:.3g}x+{1:.3g}\n" \
+              "相关系数：{2:.3f}" .format(a, b, corr)
+    with open(main_path + r"output\shuoming.txt", "w") as f:
+        f.write(doc_str)
+    return
 
-    # show result by figure
-    # plt.figure(1)
-    plt.figure(figsize=(8, 6))  # 指定图像比例： 8：6
-    plt.title('linear regression by scipy leastsq')
-    plt.scatter(x_signal, y_signal, color='b', label='train set')
-    plt.plot(x_fit, y_fit, color='r', label='fitting line')
-    plt.legend(loc='lower right')  # label面板放到figure的右下角
-    plt.show()
+
+if __name__ == "__main__":
+    if False:
+        x_signal = np.array([8.19, np.nan, 6.39, 8.71, 4.7, 2.66, 3.78])
+        y_signal = np.array([7.01, 2.78, 6.47, 6.71, 4.1, np.nan, 4.05]) * 0.01
+        x_fit, y_fit, a, b, corr = correlation(x_signal, y_signal)
+
+        # show result by figure
+        # plt.figure(1)
+        plt.figure(figsize=(8, 6))  # 指定图像比例： 8：6
+        plt.title('linear regression by scipy leastsq')
+        plt.scatter(x_signal, y_signal, color='b', label='train set')
+        plt.plot(x_fit, y_fit, color='r', label='fitting line')
+        plt.legend(loc='lower right')  # label面板放到figure的右下角
+        plt.show()
+
+        np.savetxt(main_path + r"input\shuju1.txt", x_signal)
+        np.savetxt(main_path + r"input\shuju2.txt", y_signal)
+    process()
