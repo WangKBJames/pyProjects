@@ -13,6 +13,7 @@ import math
 
 main_path = r".\data_pstprocess\\"
 
+
 def movmean(y_signal, win_n):
     '''
     :param y_signal:
@@ -99,7 +100,8 @@ def movquantile(y_signal, win_n, frac):
         elif i >= len(y_signal) - int(math.floor(win_n / 2)):
             y_frac = np.append(y_frac, np.quantile(y_signal[i - int(math.floor(win_n / 2)):], frac))
         else:
-            y_frac = np.append(y_frac, np.quantile(y_signal[i - math.floor(win_n / 2):i + int(math.ceil(win_n / 2))], frac))
+            y_frac = np.append(y_frac,
+                               np.quantile(y_signal[i - math.floor(win_n / 2):i + int(math.ceil(win_n / 2))], frac))
     return y_frac.tolist()
 
 
@@ -139,7 +141,7 @@ def data_quantile(ydata, fs):
     return [y_75, y_50, y_25]
 
 
-def data_std(ydata,fs):
+def data_std(ydata, fs):
     '''
     复选框选择“均方根”时
     :param ydata: float[] 输入特征数据
@@ -188,7 +190,7 @@ def get_range(x, data_x, frac):
     '''
     x_ind = np.argwhere(data_x == x)[0][0]
     if frac >= 1:
-        half_len_w = frac//2
+        half_len_w = frac // 2
     else:
         half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
     len_x_list = 2 * half_len_w + 1
@@ -305,7 +307,7 @@ def rloess(data_x, data_y, frac, step=1, iters=4):
     '''
     # data_y_hat = np.ones_like(data_y)
     if frac >= 1:
-        half_len_w = frac//2
+        half_len_w = frac // 2
     else:
         half_len_w = int(np.floor((data_x.shape[0] * frac) // 2))
     data_x_step = data_x[0::step]
@@ -383,7 +385,3 @@ if __name__ == "__main__":
     # plt.plot(ydata)
     # plt.show()
     process()
-
-
-
-
