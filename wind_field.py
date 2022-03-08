@@ -262,7 +262,7 @@ def process():
               "10分钟风速极值：{3:.2f}m/s\n" \
               "10分钟均方根极值：{4:.2f}m/s\n" \
               "风速均值：{5:.2f}m/s".format(wind_max, wmean_2min_max, w_scale, wmean_10min_max, wstd_10min_max, wmean)
-    with open(main_path + r"output\shuoming.txt", "w") as f:
+    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return
 

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 from scipy.stats import pearsonr
 import math
+import sys
 
 main_path = r".\feature_extraction\\"
 
@@ -118,7 +119,7 @@ def process():
         np.savetxt(main_path + r"output\fig2_y_2.txt", y_fit)
         doc_str = "趋势斜率：{0:.3g}\n" \
                   "相关系数：{1:.3f}".format(a, corr)
-    with open(main_path + r"output\shuoming.txt", "w") as f:
+    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return
 

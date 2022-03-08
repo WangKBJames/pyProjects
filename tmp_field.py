@@ -35,7 +35,7 @@ def process():
     data_2 = np.loadtxt(main_path + r"input\shuju2.txt", dtype='float')
     grad, doc_str = tmp_gradient(data_1, data_2, dis=5)
     np.savetxt(main_path + r"output\fig2_y_1.txt", grad)
-    with open(main_path + r"output\shuoming.txt", "w") as f:
+    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return
 

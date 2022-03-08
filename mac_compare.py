@@ -62,7 +62,7 @@ def mac_compare(mode_order, mode_select_1, mode_select_2):
         shape[mode_order - 1], f1, d1, shape[mode_order - 1], f2, d2, mac[mode_order - 1], np.abs((f2 - f1) / f1 * 100)
     )
     # with open(r'I:\JSTI\算法模块配置\utils\mac\shuoming.txt', 'w') as file:
-    with open(main_path + r'output\shuoming.txt', 'w') as file:
+    with open(main_path + r'output\shuoming.txt', 'w', encoding="utf-8") as file:
         file.write(doc_str)
 
     fig1 = plt.imread(main_path + r"modeCmp\m{0:d}.jpg".format(mode_order))

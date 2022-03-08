@@ -176,7 +176,7 @@ def process():
     np.savetxt(main_path + r"output\fig3_y_1.txt", axial_weight)
     np.savetxt(main_path + r"output\fig4_x.txt", dist_x)
     np.savetxt(main_path + r"output\fig4_y_1.txt", dist_y)
-    with open(main_path + r"output\shuoming.txt", "w") as f:
+    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return
 

@@ -49,7 +49,7 @@ def process():
     doc_str = "最大值：{0:.3f}\n" \
               "最小值：{1:.3f}\n" \
               "平均值：{2:.3f}".format(cxy_max, cxy_min, cxy_mean)
-    with open(main_path + r"output\shuoming.txt", "w") as f:
+    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
 
 
