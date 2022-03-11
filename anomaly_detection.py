@@ -1393,12 +1393,12 @@ if __name__ == "__main__":
 
         path = r"D:\pytestdata"
         sensor_num = "BD080101"
-        t_start_list = [2021, 8, 22, 0, 0, 0]
-        t_end_list = [2021, 8, 28, 2, 0, 0]
+        t_start_list = [2021, 8, 24, 0, 0, 0]
+        t_end_list = [2021, 8, 26, 2, 0, 0]
         t_list, data = gnss_data(path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
-        nd = data[2]*100
-        nd = nd[0:3600*24*4]
-        nd = nd - np.nanmean(nd)
+        # nd = [i * 100 for i in data[2]]
+        # nd = nd[0:3600*24*4]
+        nd = np.array(data[2]) - np.nanmean(data[2])
         nd = nd*100
         # np.savetxt(main_path + r"input\shuju.txt", nd)
         # process()

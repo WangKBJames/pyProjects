@@ -129,9 +129,9 @@ def gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1,
                 t = [ti.year, ti.month, ti.day, ti.hour]
                 file_list = data_location(main_path, sensor_num, t)
                 if len(file_list) > 0:
-                    t_list_i, *data_i = gnss_reader(file_list[0], return_ref)
+                    t_list_i, data_i = gnss_reader(file_list[0], return_ref)
                     t_list.extend(t_list_i)
-                    if not data:
+                    if data:
                         for j in range(len(data)):
                             data[j].extend(data_i[j])
                     else:
@@ -341,21 +341,38 @@ if __name__ == "__main__":
     import time
     import matplotlib.dates as mdates
     import numpy as np
-    main_path = r"I:\JSTI\数据\江阴\江阴数据\FS"
-    sensor_num = "FS060101"
-    sample_frq = 1
-    t_start_list = [2021, 12, 25, 17, 0, 0]
-    t_end_list = [2021, 12, 26, 5, 10, 0]
-    t_list, fsh, fsk, alpha, beta = wind_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq=1)
-    plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
-    plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
-    fig = plt.figure(figsize=(12, 6))  # 定义图并设置画板尺寸
-    fig.set(alpha=0.2)  # 设定图表颜色alpha参数
-    # fig.tight_layout()                                                    # 调整整体空白
-    plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
-    ax = fig.add_subplot(111)  # 定义子图
-    plt.xticks(rotation=90)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
+    if False:
+        main_path = r"I:\JSTI\数据\江阴\江阴数据\FS"
+        sensor_num = "FS060101"
+        sample_frq = 1
+        t_start_list = [2021, 12, 25, 17, 0, 0]
+        t_end_list = [2021, 12, 26, 5, 10, 0]
+        t_list, fsh, fsk, alpha, beta = wind_data(main_path, sensor_num, t_start_list, t_end_list, sample_frq=1)
+        plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+        plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+        fig = plt.figure(figsize=(12, 6))  # 定义图并设置画板尺寸
+        fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+        # fig.tight_layout()                                                    # 调整整体空白
+        plt.subplots_adjust(bottom=0.25, top=0.94, left=0.08, right=0.94, wspace=0.36, hspace=0.5)
+        ax = fig.add_subplot(111)  # 定义子图
+        plt.xticks(rotation=90)
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%m-%d %H:%M:%S"))
 
-    ax.plot(t_list, fsh, 'b')
-    plt.show()
+        ax.plot(t_list, fsh, 'b')
+        plt.show()
+
+    if True:
+        path = r"D:\pytestdata"
+        sensor_num = "BD080101"
+        t_start_list = [2021, 8, 21, 0, 0, 0]
+        t_end_list = [2021, 8, 21, 6, 0, 0]
+        t_list, data = gnss_data(path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
+        nd = data[2] * 100
+        # nd = nd[0:3600 * 24 * 4]
+        nd = nd - np.nanmean(nd)
+        nd = nd * 100
+        fig = plt.figure(figsize=(12, 8))  # 定义图并设置画板尺寸
+        fig.set(alpha=0.2)  # 设定图表颜色alpha参数
+        ax1 = fig.add_subplot(111)  # 定义子图
+        ax1.plot(nd, 'r')
+        plt.show()
