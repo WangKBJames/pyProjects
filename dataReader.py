@@ -120,7 +120,7 @@ def gnss_data(main_path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1,
             t = t_start_list[0:4]
             file_list = data_location(main_path, sensor_num, t)
             if len(file_list) > 0:
-                t_list_i, *data_i = gnss_reader(file_list[0], return_ref)
+                t_list_i, data_i = gnss_reader(file_list[0], return_ref)
                 t_list.extend(t_list_i)
                 data = data_i
         else:
