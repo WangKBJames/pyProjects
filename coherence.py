@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import signal
-import matplotlib.pyplot as plt
 
 '''
 
@@ -35,7 +34,15 @@ def coherence(x_signal, y_signal, sample_frequency):
     if type(x_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
     y_signal[np.isnan(y_signal)] = np.nanmean(y_signal)
-    frq, cxy = signal.coherence(x_signal, y_signal, sample_frequency, nperseg=1024)
+    if len(x_signal) > len(y_signal):
+        x_signal = x_signal[:len(y_signal)]
+    if len(x_signal) < len(y_signal):
+        y_signal = y_signal[:len(x_signal)]
+    if len(x_signal) < 2048:
+        frq = np.arange(0, sample_frequency / 2048 * 1025, sample_frequency / 2048)
+        cxy = np.ones_like(frq) - 1
+    else:
+        frq, cxy = signal.coherence(x_signal, y_signal, sample_frequency, nperseg=2048)
     return [frq.tolist(), cxy.tolist(), float(cxy.max()), float(cxy.min()), float(cxy.mean())]
 
 
@@ -54,6 +61,8 @@ def process():
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
     if False:
         fs = 10e3
         N = 1e5
@@ -75,4 +84,22 @@ if __name__ == "__main__":
 
         np.savetxt(main_path + r"input\shuju1.txt", x)
         np.savetxt(main_path + r"input\shuju2.txt", y)
-    process()
+    if True:
+        from dataReader import bin_data
+
+        zd_path = r"W:\ZD\振动\\"
+        zd1_sensor = "ZD020116"
+        zd2_sensor = "ZD020117"
+        t_start_list = [2022, 2, 11, 0, 0, 0]
+        t_end_list = [2022, 2, 11, 2, 0, 0]
+        _, zd1_data = bin_data(zd_path, zd1_sensor, t_start_list, t_end_list, sample_frq=20)
+        _, zd2_data = bin_data(zd_path, zd2_sensor, t_start_list, t_end_list, sample_frq=20)
+        np.savetxt(main_path + r"input\shuju1.txt", zd1_data)
+        np.savetxt(main_path + r"input\shuju2.txt", zd2_data)
+        # coherence(x_signal, y_signal, sample_frequency)
+        process()
+        data_1 = np.loadtxt(main_path + r"output\fig2_x.txt", dtype='float')
+        print(len(data_1))
+        data_2 = np.loadtxt(main_path + r"output\fig2_y_1.txt", dtype='float')
+        plt.plot(data_1, data_2)
+        plt.show()
