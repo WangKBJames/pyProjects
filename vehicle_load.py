@@ -1,188 +1,165 @@
-# -*- coding: utf-8 -*-
+import cx_Oracle
 import numpy as np
 
 main_path = r".\vehicle_load\\"
 
+# 数据库参数
+user_name = 'bridge_detection_jy'
+code = 'bridge_detection_jy'
+ipaddress = '58.213.45.94:2221/orcl'
 
-def vehicle_flow(time_num):
-    '''
-    计算车流量直方图
-    :param time_num: float，车流量计算开始时间日期时间戳，如7538584
-    :return: list[][]
-    list[0]: flow_num: float[], 车流量序列，图1 y坐标，柱状图，x轴为日期，直方图
-    list[1]: car_truck_ratio: float[], 客货比序列，图2 y坐标，柱状图，x轴为日期，直方图
-    list[2]: axial_weight: float[], 车轴重序列，图3 y坐标，单位t，柱状图，x轴为日期， 直方图
-    list[3]: dist_x: float[], 车轴重分布，图4 x轴，单位t， 直方图
-    list[4]: dist_y: float[], 某一重量车的数量， 图4 y轴，直方图
-    list[5]: doc_str: string, 文本区域 说明文字
+t_start_str = '2022-03-12 00:00:00'
+t_end_str = '2022-03-12 23:55:00'
+
+
+def traffic_stat(t_start_str, t_end_str):
     '''
 
-    flow_num = [2.5000000000000000e+03,
-                2.1000000000000000e+03,
-                3.2000000000000000e+03,
-                3.1000000000000000e+03,
-                2.6000000000000000e+03,
-                2.9500000000000000e+03,
-                4.0500000000000000e+03,
-                6.8000000000000000e+03,
-                7.2000000000000000e+03,
-                6.6000000000000000e+03,
-                5.9000000000000000e+03,
-                4.7000000000000000e+03,
-                3.1800000000000000e+03,
-                5.9400000000000000e+03,
-                6.2400000000000000e+03,
-                3.9400000000000000e+03,
-                4.8200000000000000e+03,
-                8.9200000000000000e+03,
-                8.1200000000000000e+03,
-                8.7200000000000000e+03,
-                6.8000000000000000e+03,
-                5.9000000000000000e+03,
-                4.1200000000000000e+03,
-                2.8100000000000000e+03]
+    :param t_start_str:
+    :param t_end_str:
+    :return:
+    '''
 
-    car_truck_ratio = [5.3294934483670247e+00,
-                       3.7782341762916958e+00,
-                       4.3054898234588430e+00,
-                       5.6984249992703102e+00,
-                       3.6075869686066269e+00,
-                       4.1893674720720115e+00,
-                       5.9359888835598795e+00,
-                       5.5319347626644921e+00,
-                       5.5887154155165941e+00,
-                       5.6111436339121923e+00,
-                       4.9537312633898951e+00,
-                       5.5391626361462887e+00,
-                       5.8381465146908971e+00,
-                       3.3809800903428759e+00,
-                       5.1111811902461435e+00,
-                       4.5547501870935392e+00,
-                       4.1407644230818139e+00,
-                       3.4927198884005075e+00,
-                       5.6503081325879547e+00,
-                       5.0184565097837446e+00,
-                       4.1817534546710391e+00,
-                       6.0833336710092372e+00,
-                       4.5244631165557623e+00,
-                       5.3453650062054123e+00]
+    db = cx_Oracle.connect(user_name, code, ipaddress)  # 连接数据库
+    # print(db.version)  # 打印版本看看 显示 11.2.0.1.0
+    cur = db.cursor()  # 游标操作
 
-    axial_weight = [5.5538161891035652e+03,
-                    4.8822927068496474e+03,
-                    6.2285343692282631e+03,
-                    6.8816632313393839e+03,
-                    5.8236743399456172e+03,
-                    6.5740242899564037e+03,
-                    8.4647922830722528e+03,
-                    1.4068632053940099e+04,
-                    1.5568292142902583e+04,
-                    1.3694091805754131e+04,
-                    1.2175670430978756e+04,
-                    9.6065725110298990e+03,
-                    6.3459354484563710e+03,
-                    1.2800098018297103e+04,
-                    1.3228719751118111e+04,
-                    7.8911381962343557e+03,
-                    1.0496349505705493e+04,
-                    1.8435382113662949e+04,
-                    1.7357580389339048e+04,
-                    1.8327221388746093e+04,
-                    1.4212586068152883e+04,
-                    1.2414985210510167e+04,
-                    8.3382969146229334e+03,
-                    5.4265198153360752e+03]
+    # 小时车流量
+    flow_str = "select substr(t.evt_time,12,2), count(ID) from T_STG_WEIGH_VALUE t where to_date(t.evt_time, " \
+               "'YYYY-MM-DD HH24:MI:SS') " \
+               f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+               "'YYYY-MM-DD HH24:MI:SS') group by substr(t.evt_time,12,2) order by substr(t.evt_time,12,2)"
+    cur.execute(flow_str)  # 执行sql语句
+    flow_rows = cur.fetchall()  # 获取数据
+    h_list_flow = [int(x[0]) for x in flow_rows]
+    flow = [x[1] for x in flow_rows]
 
-    dist_y = [1.1614000000000000e+04,
-              1.3413000000000000e+04,
-              1.4417000000000000e+04,
-              1.3942000000000000e+04,
-              1.3743000000000000e+04,
-              1.0147000000000000e+04,
-              7.5860000000000000e+03,
-              5.5180000000000000e+03,
-              3.1630000000000000e+03,
-              1.7740000000000000e+03,
-              9.8700000000000000e+02,
-              4.3900000000000000e+02,
-              2.9800000000000000e+02,
-              4.1000000000000000e+01,
-              4.1000000000000000e+01,
-              1.1000000000000000e+01,
-              1.0000000000000000e+01,
-              1.0000000000000000e+01,
-              7.0000000000000000e+00]
+    # 各车道车流量
+    lane_no_str = "select LANE_NO, count(ID) from T_STG_WEIGH_VALUE t where to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                  f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                  "'YYYY-MM-DD HH24:MI:SS') group by LANE_NO order by LANE_NO"
+    cur.execute(lane_no_str)  # 执行sql语句
+    lane_rows = cur.fetchall()  # 获取数据
+    lane_list = [x[0] for x in lane_rows]
+    lane_count = [x[1] for x in lane_rows]
 
-    dist_x = [3.8866830894551851e-01,
-              9.8886005911172825e-01,
-              1.5890518092779371e+00,
-              2.1892435594441459e+00,
-              2.7894353096103548e+00,
-              3.3896270597765654e+00,
-              3.9898188099427743e+00,
-              4.5900105601089827e+00,
-              5.1902023102751915e+00,
-              5.7903940604414004e+00,
-              6.3905858106076110e+00,
-              6.9907775607738216e+00,
-              7.5909693109400305e+00,
-              8.1911610611062393e+00,
-              8.7913528112724499e+00,
-              9.3915445614386606e+00,
-              9.9917363116048676e+00,
-              1.0915445614386606e+01,
-              1.1917363116048676e+01]
+    # 小时车速
+    velocity_str = "select substr(t.evt_time,12,2), avg(speed) from T_STG_WEIGH_VALUE t where to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                   f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                   "'YYYY-MM-DD HH24:MI:SS') group by substr(t.evt_time,12,2) order by substr(t.evt_time,12,2)"
+    cur.execute(velocity_str)  # 执行sql语句
+    velocity_rows = cur.fetchall()  # 获取数据
+    h_list_velocity = [int(x[0]) for x in velocity_rows]
+    velocity = [float(x[1]) for x in velocity_rows]
 
-    np.random.seed(int(time_num))
-    flow_num_r = 0.85 + 0.3 * np.random.random(len(flow_num))
-    flow_num = np.array(flow_num) * flow_num_r
+    # 车重分布
+    weight_t_str = "select floor(t.total_weight/1000), count(*) from T_STG_WEIGH_VALUE t where to_date(t.evt_time, " \
+                   "'YYYY-MM-DD HH24:MI:SS') " \
+                   f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}'," \
+                   " 'YYYY-MM-DD HH24:MI:SS') group by floor(t.total_weight/1000) order by floor(" \
+                   "t.total_weight/1000) "
+    cur.execute(weight_t_str)  # 执行sql语句
+    weight_dist_rows = cur.fetchall()  # 获取数据
+    weight_list = [x[0] for x in weight_dist_rows]
+    weight_count = [x[1] for x in weight_dist_rows]
 
-    np.random.seed(int(time_num + 100))
-    car_truck_ratio_r = 0.9 + 0.2 * np.random.random(len(car_truck_ratio))
-    car_truck_ratio = np.array(car_truck_ratio) * car_truck_ratio_r
+    # 上、下行流量比
+    up_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                   f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                   "'YYYY-MM-DD HH24:MI:SS')) and (t.LANE_NO <= 3)"
+    cur.execute(up_count_str)  # 执行sql语句
+    up_count_rows = cur.fetchall()  # 获取数据
+    down_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                     f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                     "'YYYY-MM-DD HH24:MI:SS')) and (t.LANE_NO >= 4)"
+    cur.execute(down_count_str)  # 执行sql语句
+    down_count_rows = cur.fetchall()  # 获取数据
+    up_down_ratio = int(up_count_rows[0][0]) / int(down_count_rows[0][0])
 
-    np.random.seed(int(time_num + 200))
-    axial_weight_r = 0.8 + 0.4 * np.random.random(len(axial_weight))
-    axial_weight = np.array(axial_weight) * axial_weight_r
+    # 客车流量、货车流量、客货比
+    car_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                    f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                    "'YYYY-MM-DD HH24:MI:SS')) and (t.AXLES_COUNT < 3)"
+    cur.execute(car_count_str)  # 执行sql语句
+    car_count_rows = cur.fetchall()  # 获取数据
+    truck_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                      f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                      "'YYYY-MM-DD HH24:MI:SS')) and (t.AXLES_COUNT >= 3)"
+    cur.execute(truck_count_str)  # 执行sql语句
+    truck_count_rows = cur.fetchall()  # 获取数据
+    car_count = int(car_count_rows[0][0])
+    truck_count = int(truck_count_rows[0][0])
+    ct_ratio = car_count / truck_count
 
-    np.random.seed(int(time_num + 300))
-    dist_y_r = 0.9 + 0.2 * np.random.random(len(dist_y))
-    dist_y = np.array(dist_y) * dist_y_r
+    # 超限车辆数
+    over_weight_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                            f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                            "'YYYY-MM-DD HH24:MI:SS')) and (t.total_weight/1000 > 57)"
+    cur.execute(over_weight_count_str)  # 执行sql语句
+    over_weight_count_rows = cur.fetchall()  # 获取数据
+    over_weight_count = int(over_weight_count_rows[0][0])
 
-    count = np.floor(np.sum(flow_num))
-    up_down_ratio = 0.85 + 0.3 * np.random.random()
-    ct_ratio = np.mean(car_truck_ratio)
-    count_car = np.floor(count * ct_ratio / (ct_ratio + 1))
-    count_truck = count - count_car
-    count_over_weight = 0.0
-    weight_max = 24.0 + 15 * np.random.random()
+    # 最重车
+    weight_max_str = "select max(t.total_weight/1000) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                     f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                     "'YYYY-MM-DD HH24:MI:SS'))"
+    cur.execute(weight_max_str)  # 执行sql语句
+    weight_max_rows = cur.fetchall()  # 获取数据
+    weight_max = float(weight_max_rows[0][0])
 
-    doc_str = "车辆荷载统计：\n" \
-              "总车流量：{0:d}辆\n" \
-              "上、下行车流量比：{1:.2f}\n" \
-              "客车流量：{2:d}辆\n" \
-              "货车流量：{3:d}辆\n" \
-              "客货比：{4:.2f}\n" \
-              "超载车辆数：{5:d}辆\n" \
-              "最重车辆：{6:.2f}t".format(int(count), up_down_ratio, int(count_car), int(count_truck), ct_ratio,
-                                     int(count_over_weight), weight_max)
-    return [flow_num.tolist(), car_truck_ratio.tolist(), axial_weight.tolist(), dist_x, dist_y.tolist(), doc_str]
+    # 昼日流量比
+    day_num_str = "select count(ID) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                  f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                  "'YYYY-MM-DD HH24:MI:SS')) and (to_number(substr(t.evt_time,12,2)) between 6 and 18) "
+    cur.execute(day_num_str)  # 执行sql语句
+    day_num_rows = cur.fetchall()  # 获取数据
+    night_num_str = "select count(ID) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
+                    f"between to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', " \
+                    "'YYYY-MM-DD HH24:MI:SS')) and (to_number(substr(t.evt_time,12,2))<6 or to_number(substr(t.evt_time,12," \
+                    "2))>18) "
+    cur.execute(night_num_str)  # 执行sql语句
+    night_num_rows = cur.fetchall()  # 获取数据
+    all_count = int(day_num_rows[0][0]) + int(night_num_rows[0][0])
+    day_flow_ratio = int(day_num_rows[0][0]) / (int(day_num_rows[0][0]) + int(night_num_rows[0][0]))
+
+    # 高峰小时系数
+    count_15 = "select " \
+               "max(count(*)) from T_STG_WEIGH_VALUE t where to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') between " \
+               f"to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', 'YYYY-MM-DD HH24:MI:SS') " \
+               "group by substr(t.evt_time,1,14) || case when floor(to_number(substr(t.evt_time,15,2) / 15)) * 15 = 0 " \
+               "then '00' else to_char(floor(to_number(substr(t.evt_time,15,2) / 15)) * 15) end || ':00' order by " \
+               "count(*) desc "
+    cur.execute(count_15)  # 执行sql语句
+    count_15_rows = cur.fetchall()  # 获取数据
+    count_60 = "select " \
+               "max(count(*)) from T_STG_WEIGH_VALUE t where to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') between " \
+               f"to_date('{t_start_str}', 'YYYY-MM-DD HH24:MI:SS') and to_date('{t_end_str}', 'YYYY-MM-DD HH24:MI:SS') " \
+               "group by substr(t.evt_time,1,13) " \
+               "order by " \
+               "max(count(*)) desc "
+    cur.execute(count_60)  # 执行sql语句
+    count_60_rows = cur.fetchall()  # 获取数据
+    peak_hour_coff = float(count_60_rows[0][0]) / float(count_15_rows[0][0]) / 4
+
+    db.close()
+
+    return [h_list_flow, flow, lane_list, lane_count, h_list_velocity, velocity, weight_list, weight_count,
+            all_count, up_down_ratio, car_count, truck_count, ct_ratio, over_weight_count, weight_max,
+            day_flow_ratio, peak_hour_coff]
 
 
 def process():
-    time_num = np.loadtxt(main_path + r"input\par.txt", dtype='float')
-    flow_num, car_truck_ratio, axial_weight, dist_x, dist_y, doc_str = vehicle_flow(time_num)
-    np.savetxt(main_path + r"output\fig1_y_1.txt", flow_num)
-    np.savetxt(main_path + r"output\fig2_y_1.txt", car_truck_ratio)
-    np.savetxt(main_path + r"output\fig3_y_1.txt", axial_weight)
-    np.savetxt(main_path + r"output\fig4_x.txt", dist_x)
-    np.savetxt(main_path + r"output\fig4_y_1.txt", dist_y)
-    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
-        f.write(doc_str)
-    return
+    pass
 
 
 if __name__ == "__main__":
-    # import matplotlib.pyplot as plt
-    # flow_num, car_truck_ratio, axial_weight, dist_x, dist_y, doc_str = vehicle_flow(322344)
-    # print(doc_str)
-    process()
+    h_list_flow, flow, lane_list, lane_count, h_list_velocity, velocity, weight_list, weight_count, all_count, \
+        up_down_ratio, car_count, truck_count, ct_ratio, over_weight_count, weight_max, day_flow_ratio, peak_hour_coff \
+        = traffic_stat(t_start_str, t_end_str)
+
+    print(peak_hour_coff)
+
+    # 打印数据
+    # for row in weight_dist_rows:
+    #     print(f"{row[0]},  {row[1]} ", end='\n')
+    # # print(peak_hour_coff, end='\n')
