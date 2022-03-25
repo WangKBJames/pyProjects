@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cx_Oracle
 import numpy as np
 
@@ -7,6 +8,7 @@ main_path = r".\vehicle_load\\"
 user_name = 'bridge_detection_jy'
 code = 'bridge_detection_jy'
 ipaddress = '58.213.45.94:2221/orcl'
+
 
 t_start_str = '2022-03-12 00:00:00'
 t_end_str = '2022-03-12 23:55:00'
@@ -40,7 +42,7 @@ def traffic_stat(t_start_str, t_end_str):
                   "'YYYY-MM-DD HH24:MI:SS') group by LANE_NO order by LANE_NO"
     cur.execute(lane_no_str)  # 执行sql语句
     lane_rows = cur.fetchall()  # 获取数据
-    lane_list = [x[0] for x in lane_rows]
+    lane_list = [int(x[0]) for x in lane_rows]
     lane_count = [x[1] for x in lane_rows]
 
     # 小时车速
@@ -149,17 +151,40 @@ def traffic_stat(t_start_str, t_end_str):
 
 
 def process():
-    pass
+    par = np.loadtxt(main_path + r"input\par.txt", dtype=str, delimiter=',')
+    t_start_str = par[0]
+    t_end_str = par[1]
+    h_list_flow, flow, lane_list, lane_count, h_list_velocity, velocity, weight_list, weight_count, all_count, \
+    up_down_ratio, car_count, truck_count, ct_ratio, over_weight_count, weight_max, day_flow_ratio, peak_hour_coff \
+        = traffic_stat(t_start_str, t_end_str)
+    np.savetxt(main_path + r"output\fig1_x_1.txt", h_list_flow)
+    np.savetxt(main_path + r"output\fig1_y_1.txt", flow)
+    np.savetxt(main_path + r"output\fig2_x_1.txt", lane_list)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", lane_count)
+    np.savetxt(main_path + r"output\fig3_x_1.txt", h_list_velocity)
+    np.savetxt(main_path + r"output\fig3_y_1.txt", velocity)
+    np.savetxt(main_path + r"output\fig4_x_1.txt", weight_list)
+    np.savetxt(main_path + r"output\fig4_y_1.txt", weight_count)
+    doc_str = "车辆荷载统计：\n" \
+              "总车流量：{0:d}辆\n" \
+              "上、下行车流量比：{1:.2f}\n" \
+              "客车流量：{2:d}辆\n" \
+              "货车流量：{3:d}辆\n" \
+              "客货比：{4:.2f}\n" \
+              "超载车辆数：{5:d}辆\n" \
+              "最重车辆：{6:.2f}t\n" \
+              "昼日流量比：{7:.2f}\n" \
+              "高峰小时系数：{8:.2f}".format(all_count, up_down_ratio, car_count, truck_count, ct_ratio,
+                                      over_weight_count, weight_max, day_flow_ratio, peak_hour_coff)
+    with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
+        f.write(doc_str)
+    return
 
 
 if __name__ == "__main__":
-    h_list_flow, flow, lane_list, lane_count, h_list_velocity, velocity, weight_list, weight_count, all_count, \
-        up_down_ratio, car_count, truck_count, ct_ratio, over_weight_count, weight_max, day_flow_ratio, peak_hour_coff \
-        = traffic_stat(t_start_str, t_end_str)
-
-    print(peak_hour_coff)
-
-    # 打印数据
-    # for row in weight_dist_rows:
-    #     print(f"{row[0]},  {row[1]} ", end='\n')
-    # # print(peak_hour_coff, end='\n')
+    # h_list_flow, flow, lane_list, lane_count, h_list_velocity, velocity, weight_list, weight_count, all_count, \
+    #     up_down_ratio, car_count, truck_count, ct_ratio, over_weight_count, weight_max, day_flow_ratio, peak_hour_coff \
+    #     = traffic_stat(t_start_str, t_end_str)
+    #
+    # print(peak_hour_coff)
+    process()
