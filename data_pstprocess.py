@@ -163,20 +163,22 @@ def data_untrend(ydata, fs):
     去趋势数据序列， float[]，图2 y轴，x轴为时间
     '''
 
-    if type(ydata) is not np.ndarray:
-        tmp_1 = np.array(ydata, dtype='float')
-    if fs == 1:
-        frac = np.min([int(0.2 * len(ydata)), int(14400)])
-        step = np.min([int(0.05 * len(ydata)), int(2000)])
-    elif fs < 1:
-        frac = np.min([int(0.2 * len(ydata)), int(12)])
-        step = np.min([int(0.05 * len(ydata)), int(6)])
-    elif fs > 1:
-        frac = np.min([int(0.2 * len(ydata)), int(3600)])
-        step = np.min([int(0.05 * len(ydata)), int(2000)])
-    xdata = np.arange(len(ydata))
-    y_hat, y_w = rloess(xdata, ydata, frac, step, iters=4)
-    y_untrd = ydata - y_hat
+    # if type(ydata) is not np.ndarray:
+    #     tmp_1 = np.array(ydata, dtype='float')
+    # if fs == 1:
+    #     frac = np.min([int(0.2 * len(ydata)), int(14400)])
+    #     step = np.min([int(0.05 * len(ydata)), int(2000)])
+    # elif fs < 1:
+    #     frac = np.min([int(0.2 * len(ydata)), int(12)])
+    #     step = np.min([int(0.05 * len(ydata)), int(6)])
+    # elif fs > 1:
+    #     frac = np.min([int(0.2 * len(ydata)), int(3600)])
+    #     step = np.min([int(0.05 * len(ydata)), int(2000)])
+    # xdata = np.arange(len(ydata))
+    # y_hat, y_w = rloess(xdata, ydata, frac, step, iters=4)
+    # y_untrd = ydata - y_hat
+    # return y_untrd
+    y_untrd = ydata - movmean(ydata, fs*1800)
     return y_untrd
 
 

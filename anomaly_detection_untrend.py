@@ -194,6 +194,439 @@ def lwlrTest(testArr, xArr, yArr, tao=1.0):
     return yHat
 
 
+# def isoutlier(data_y, data_y_hat, rate_threshould):
+#     '''
+#
+#     :param data_y:
+#     :param data_y_hat:
+#     :param rate_threshould:
+#     :return:
+#     '''
+#     y_norm = data_y - data_y_hat
+#     dy = np.diff(y_norm)
+#     dy_mid = np.nanmedian(np.abs(dy))
+#     out_ind = np.argwhere(np.abs(dy) >= rate_threshould).T[0]
+#
+#     # 第一次过滤
+#     out_single = []
+#     for i in out_ind:
+#         if i - 1 in out_ind:
+#             out_single.append(i)
+#     out_single = np.unique(out_single)
+#     for i in out_single:
+#         if i + 1 not in out_single:
+#             y_norm[i] = (y_norm[i-1] + y_norm[i+1])/2
+#         else:
+#             j = i
+#             while True:
+#                 j += 1
+#                 if j + 1 not in out_single:
+#                     y_norm[i] = y_norm[i - 1] + (y_norm[j+1] - y_norm[i - 1]) / (j - i + 2)
+#                     break
+#
+#     # 二次过滤
+#     y_std3 = np.nanstd(y_norm) * 1.0
+#     out_alternative = np.argwhere(np.abs(y_norm) > y_std3).T[0]
+#     margin_ind = []
+#     # margin_ind_i = [out_alternative[0]]
+#     margin_ind_i = []
+#     y_norm_back = y_norm
+#     for i in range(0, len(out_alternative)):
+#         if i == 0:
+#             margin_ind_i.append(out_alternative[i])
+#         if i == len(out_alternative) - 1:
+#             margin_ind_i.append(out_alternative[i])
+#         if i > 0 and (out_alternative[i] - out_alternative[i - 1]) > 1:
+#             margin_ind_i.append(out_alternative[i])
+#         if i < len(out_alternative) - 1 and (out_alternative[i + 1] - out_alternative[i]) > 1 or i == (len(out_alternative) - 2):
+#             margin_ind_i.append(out_alternative[i])
+#         if len(margin_ind_i) == 2:
+#             margin_ind.append(margin_ind_i)
+#             margin_ind_i = []
+#     for margin_ind_i in margin_ind:
+#         if margin_ind_i[0] - 1 in out_ind and margin_ind_i[1] in out_ind:
+#             # print('====>'+str(margin_ind_i[0])+","+str(margin_ind_i[1]))
+#             margin_i = margin_ind_i[0]
+#             margin_j = margin_ind_i[1]
+#             while True:
+#                 if margin_i - 1 in out_ind:
+#                     margin_i -= 1
+#                 elif margin_i - 2 in out_ind:
+#                     margin_i -= 2
+#                 elif margin_i - 3 in out_ind:
+#                     margin_i -= 3
+#                 elif margin_i - 4 in out_ind:
+#                     margin_i -= 4
+#                 elif margin_i - 5 in out_ind:
+#                     margin_i -= 5
+#                 elif margin_i - 6 in out_ind:
+#                     margin_i -= 6
+#                 elif margin_i - 7 in out_ind:
+#                     margin_i -= 7
+#                 elif margin_i - 8 in out_ind:
+#                     margin_i -= 8
+#                 elif margin_i - 9 in out_ind:
+#                     margin_i -= 9
+#                 elif margin_i - 10 in out_ind:
+#                     margin_i -= 10
+#                 elif margin_i - 11 in out_ind:
+#                     margin_i -= 11
+#                 elif margin_i - 12 in out_ind:
+#                     margin_i -= 12
+#                 elif margin_i - 13 in out_ind:
+#                     margin_i -= 13
+#                 elif margin_i - 14 in out_ind:
+#                     margin_i -= 14
+#                 elif margin_i - 15 in out_ind:
+#                     margin_i -= 15
+#                 elif margin_i - 16 in out_ind:
+#                     margin_i -= 16
+#                 elif margin_i - 17 in out_ind:
+#                     margin_i -= 17
+#                 elif margin_i - 18 in out_ind:
+#                     margin_i -= 18
+#                 elif margin_i - 19 in out_ind:
+#                     margin_i -= 19
+#                 elif margin_i - 20 in out_ind:
+#                     margin_i -= 20
+#                 elif margin_i - 21 in out_ind:
+#                     margin_i -= 21
+#                 elif margin_i - 22 in out_ind:
+#                     margin_i -= 22
+#                 elif margin_i - 23 in out_ind:
+#                     margin_i -= 23
+#                 elif margin_i - 24 in out_ind:
+#                     margin_i -= 24
+#                 elif margin_i - 25 in out_ind:
+#                     margin_i -= 25
+#                 elif margin_i - 26 in out_ind:
+#                     margin_i -= 26
+#                 elif margin_i - 27 in out_ind:
+#                     margin_i -= 27
+#                 elif margin_i - 28 in out_ind:
+#                     margin_i -= 28
+#                 elif margin_i - 29 in out_ind:
+#                     margin_i -= 29
+#                 elif margin_i - 30 in out_ind:
+#                     margin_i -= 30
+#                 elif margin_i - 31 in out_ind:
+#                     margin_i -= 31
+#                 elif margin_i - 32 in out_ind:
+#                     margin_i -= 32
+#                 elif margin_i - 33 in out_ind:
+#                     margin_i -= 33
+#                 elif margin_i - 34 in out_ind:
+#                     margin_i -= 34
+#                 elif margin_i - 35 in out_ind:
+#                     margin_i -= 35
+#                 elif margin_i - 36 in out_ind:
+#                     margin_i -= 36
+#                 elif margin_i - 37 in out_ind:
+#                     margin_i -= 37
+#                 elif margin_i - 38 in out_ind:
+#                     margin_i -= 38
+#                 elif margin_i - 39 in out_ind:
+#                     margin_i -= 39
+#                 elif margin_i - 40 in out_ind:
+#                     margin_i -= 40
+#                 else:
+#                     break
+#             margin_j_p = margin_j + 1
+#             while True:
+#                 if margin_j_p + 1 in out_ind:
+#                     margin_j_p += 1
+#                 elif margin_j_p + 2 in out_ind:
+#                     margin_j_p += 2
+#                 elif margin_j_p + 3 in out_ind:
+#                     margin_j_p += 3
+#                 elif margin_j_p + 4 in out_ind:
+#                     margin_j_p += 4
+#                 elif margin_j_p + 5 in out_ind:
+#                     margin_j_p += 5
+#                 elif margin_j_p + 6 in out_ind:
+#                     margin_j_p += 6
+#                 elif margin_j_p + 7 in out_ind:
+#                     margin_j_p += 7
+#                 elif margin_j_p + 8 in out_ind:
+#                     margin_j_p += 8
+#                 elif margin_j_p + 9 in out_ind:
+#                     margin_j_p += 9
+#                 elif margin_j_p + 10 in out_ind:
+#                     margin_j_p += 10
+#                 elif margin_j_p + 11 in out_ind:
+#                     margin_j_p += 11
+#                 elif margin_j_p + 12 in out_ind:
+#                     margin_j_p += 12
+#                 elif margin_j_p + 13 in out_ind:
+#                     margin_j_p += 13
+#                 elif margin_j_p + 14 in out_ind:
+#                     margin_j_p += 14
+#                 elif margin_j_p + 15 in out_ind:
+#                     margin_j_p += 15
+#                 elif margin_j_p + 16 in out_ind:
+#                     margin_j_p += 16
+#                 elif margin_j_p + 17 in out_ind:
+#                     margin_j_p += 17
+#                 elif margin_j_p + 18 in out_ind:
+#                     margin_j_p += 18
+#                 elif margin_j_p + 19 in out_ind:
+#                     margin_j_p += 19
+#                 elif margin_j_p + 20 in out_ind:
+#                     margin_j_p += 20
+#                 elif margin_j_p + 21 in out_ind:
+#                     margin_j_p += 21
+#                 elif margin_j_p + 22 in out_ind:
+#                     margin_j_p += 22
+#                 elif margin_j_p + 23 in out_ind:
+#                     margin_j_p += 23
+#                 elif margin_j_p + 24 in out_ind:
+#                     margin_j_p += 24
+#                 elif margin_j_p + 25 in out_ind:
+#                     margin_j_p += 25
+#                 elif margin_j_p + 26 in out_ind:
+#                     margin_j_p += 26
+#                 elif margin_j_p + 27 in out_ind:
+#                     margin_j_p += 27
+#                 elif margin_j_p + 28 in out_ind:
+#                     margin_j_p += 28
+#                 elif margin_j_p + 29 in out_ind:
+#                     margin_j_p += 29
+#                 elif margin_j_p + 30 in out_ind:
+#                     margin_j_p += 30
+#                 elif margin_j_p + 31 in out_ind:
+#                     margin_j_p += 31
+#                 elif margin_j_p + 32 in out_ind:
+#                     margin_j_p += 32
+#                 elif margin_j_p + 33 in out_ind:
+#                     margin_j_p += 33
+#                 elif margin_j_p + 34 in out_ind:
+#                     margin_j_p += 34
+#                 elif margin_j_p + 35 in out_ind:
+#                     margin_j_p += 35
+#                 elif margin_j_p + 36 in out_ind:
+#                     margin_j_p += 36
+#                 elif margin_j_p + 37 in out_ind:
+#                     margin_j_p += 37
+#                 elif margin_j_p + 38 in out_ind:
+#                     margin_j_p += 38
+#                 elif margin_j_p + 39 in out_ind:
+#                     margin_j_p += 39
+#                 elif margin_j_p + 40 in out_ind:
+#                     margin_j_p += 40
+#                 else:
+#                     margin_j = margin_j_p - 1
+#                     break
+#             out_data = y_norm[margin_i:margin_j_p]
+#             d_out_data = np.diff(out_data)
+#             d_out_data[np.argwhere(np.abs(d_out_data) > rate_threshould)] = 0
+#             out_data_zero = np.insert(np.cumsum(d_out_data), 0, 0.0)
+#             y_fit_start = y_norm[margin_i - 1]
+#             y_fit_end = y_norm[margin_j_p]
+#             y_err = (y_fit_end - y_fit_start) - (out_data_zero[-1] - out_data_zero[0])
+#             x_fit = np.arange(len(out_data_zero))
+#             d_y = x_fit * y_err/len(out_data_zero)
+#             out_data_back = y_fit_start + out_data_zero + d_y
+#             y_norm_back[margin_i:margin_j_p] = out_data_back
+#         elif margin_ind_i[0] - 1 in out_ind:
+#             margin_i = margin_ind_i[0]
+#             margin_j = margin_ind_i[1]
+#             while True:
+#                 if margin_i - 1 in out_ind:
+#                     margin_i -= 1
+#                 elif margin_i - 2 in out_ind:
+#                     margin_i -= 2
+#                 elif margin_i - 3 in out_ind:
+#                     margin_i -= 3
+#                 elif margin_i - 4 in out_ind:
+#                     margin_i -= 4
+#                 elif margin_i - 5 in out_ind:
+#                     margin_i -= 5
+#                 elif margin_i - 6 in out_ind:
+#                     margin_i -= 6
+#                 elif margin_i - 7 in out_ind:
+#                     margin_i -= 7
+#                 elif margin_i - 8 in out_ind:
+#                     margin_i -= 8
+#                 elif margin_i - 9 in out_ind:
+#                     margin_i -= 9
+#                 elif margin_i - 10 in out_ind:
+#                     margin_i -= 10
+#                 elif margin_i - 11 in out_ind:
+#                     margin_i -= 11
+#                 elif margin_i - 12 in out_ind:
+#                     margin_i -= 12
+#                 elif margin_i - 13 in out_ind:
+#                     margin_i -= 13
+#                 elif margin_i - 14 in out_ind:
+#                     margin_i -= 14
+#                 elif margin_i - 15 in out_ind:
+#                     margin_i -= 15
+#                 elif margin_i - 16 in out_ind:
+#                     margin_i -= 16
+#                 elif margin_i - 17 in out_ind:
+#                     margin_i -= 17
+#                 elif margin_i - 18 in out_ind:
+#                     margin_i -= 18
+#                 elif margin_i - 19 in out_ind:
+#                     margin_i -= 19
+#                 elif margin_i - 20 in out_ind:
+#                     margin_i -= 20
+#                 elif margin_i - 21 in out_ind:
+#                     margin_i -= 21
+#                 elif margin_i - 22 in out_ind:
+#                     margin_i -= 22
+#                 elif margin_i - 23 in out_ind:
+#                     margin_i -= 23
+#                 elif margin_i - 24 in out_ind:
+#                     margin_i -= 24
+#                 elif margin_i - 25 in out_ind:
+#                     margin_i -= 25
+#                 elif margin_i - 26 in out_ind:
+#                     margin_i -= 26
+#                 elif margin_i - 27 in out_ind:
+#                     margin_i -= 27
+#                 elif margin_i - 28 in out_ind:
+#                     margin_i -= 28
+#                 elif margin_i - 29 in out_ind:
+#                     margin_i -= 29
+#                 elif margin_i - 30 in out_ind:
+#                     margin_i -= 30
+#                 elif margin_i - 31 in out_ind:
+#                     margin_i -= 31
+#                 elif margin_i - 32 in out_ind:
+#                     margin_i -= 32
+#                 elif margin_i - 33 in out_ind:
+#                     margin_i -= 33
+#                 elif margin_i - 34 in out_ind:
+#                     margin_i -= 34
+#                 elif margin_i - 35 in out_ind:
+#                     margin_i -= 35
+#                 elif margin_i - 36 in out_ind:
+#                     margin_i -= 36
+#                 elif margin_i - 37 in out_ind:
+#                     margin_i -= 37
+#                 elif margin_i - 38 in out_ind:
+#                     margin_i -= 38
+#                 elif margin_i - 39 in out_ind:
+#                     margin_i -= 39
+#                 elif margin_i - 40 in out_ind:
+#                     margin_i -= 40
+#                 else:
+#                     break
+#             margin_j_p = margin_j + 1
+#             out_data = y_norm[margin_i:margin_j_p]
+#             d_out_data = np.diff(out_data)
+#             d_out_data[np.argwhere(np.abs(d_out_data) > rate_threshould)] = 0
+#             out_data_zero = np.insert(np.cumsum(d_out_data), 0, 0.0)
+#             y_fit_start = y_norm[margin_i - 1]
+#             y_fit_end = y_norm[margin_j_p]
+#             y_err = (y_fit_end - y_fit_start) - (out_data_zero[-1] - out_data_zero[0])
+#             x_fit = np.arange(len(out_data_zero))
+#             d_y = x_fit * y_err/len(out_data_zero)
+#             out_data_back = y_fit_start + out_data_zero + d_y
+#             y_norm_back[margin_i:margin_j_p] = out_data_back
+#         elif margin_ind_i[1] in out_ind:
+#             margin_i = margin_ind_i[0]
+#             margin_j = margin_ind_i[1]
+#             margin_j_p = margin_j + 1
+#             while True:
+#                 if margin_j_p + 1 in out_ind:
+#                     margin_j_p += 1
+#                 elif margin_j_p + 2 in out_ind:
+#                     margin_j_p += 2
+#                 elif margin_j_p + 3 in out_ind:
+#                     margin_j_p += 3
+#                 elif margin_j_p + 4 in out_ind:
+#                     margin_j_p += 4
+#                 elif margin_j_p + 5 in out_ind:
+#                     margin_j_p += 5
+#                 elif margin_j_p + 6 in out_ind:
+#                     margin_j_p += 6
+#                 elif margin_j_p + 7 in out_ind:
+#                     margin_j_p += 7
+#                 elif margin_j_p + 8 in out_ind:
+#                     margin_j_p += 8
+#                 elif margin_j_p + 9 in out_ind:
+#                     margin_j_p += 9
+#                 elif margin_j_p + 10 in out_ind:
+#                     margin_j_p += 10
+#                 elif margin_j_p + 11 in out_ind:
+#                     margin_j_p += 11
+#                 elif margin_j_p + 12 in out_ind:
+#                     margin_j_p += 12
+#                 elif margin_j_p + 13 in out_ind:
+#                     margin_j_p += 13
+#                 elif margin_j_p + 14 in out_ind:
+#                     margin_j_p += 14
+#                 elif margin_j_p + 15 in out_ind:
+#                     margin_j_p += 15
+#                 elif margin_j_p + 16 in out_ind:
+#                     margin_j_p += 16
+#                 elif margin_j_p + 17 in out_ind:
+#                     margin_j_p += 17
+#                 elif margin_j_p + 18 in out_ind:
+#                     margin_j_p += 18
+#                 elif margin_j_p + 19 in out_ind:
+#                     margin_j_p += 19
+#                 elif margin_j_p + 20 in out_ind:
+#                     margin_j_p += 20
+#                 elif margin_j_p + 21 in out_ind:
+#                     margin_j_p += 21
+#                 elif margin_j_p + 22 in out_ind:
+#                     margin_j_p += 22
+#                 elif margin_j_p + 23 in out_ind:
+#                     margin_j_p += 23
+#                 elif margin_j_p + 24 in out_ind:
+#                     margin_j_p += 24
+#                 elif margin_j_p + 25 in out_ind:
+#                     margin_j_p += 25
+#                 elif margin_j_p + 26 in out_ind:
+#                     margin_j_p += 26
+#                 elif margin_j_p + 27 in out_ind:
+#                     margin_j_p += 27
+#                 elif margin_j_p + 28 in out_ind:
+#                     margin_j_p += 28
+#                 elif margin_j_p + 29 in out_ind:
+#                     margin_j_p += 29
+#                 elif margin_j_p + 30 in out_ind:
+#                     margin_j_p += 30
+#                 elif margin_j_p + 31 in out_ind:
+#                     margin_j_p += 31
+#                 elif margin_j_p + 32 in out_ind:
+#                     margin_j_p += 32
+#                 elif margin_j_p + 33 in out_ind:
+#                     margin_j_p += 33
+#                 elif margin_j_p + 34 in out_ind:
+#                     margin_j_p += 34
+#                 elif margin_j_p + 35 in out_ind:
+#                     margin_j_p += 35
+#                 elif margin_j_p + 36 in out_ind:
+#                     margin_j_p += 36
+#                 elif margin_j_p + 37 in out_ind:
+#                     margin_j_p += 37
+#                 elif margin_j_p + 38 in out_ind:
+#                     margin_j_p += 38
+#                 elif margin_j_p + 39 in out_ind:
+#                     margin_j_p += 39
+#                 elif margin_j_p + 40 in out_ind:
+#                     margin_j_p += 40
+#                 else:
+#                     margin_j = margin_j_p - 1
+#                     break
+#             out_data = y_norm[margin_i:margin_j_p]
+#             d_out_data = np.diff(out_data)
+#             d_out_data[np.argwhere(np.abs(d_out_data) > rate_threshould)] = 0
+#             out_data_zero = np.insert(np.cumsum(d_out_data), 0, 0.0)
+#             y_fit_start = y_norm[margin_i - 1]
+#             y_fit_end = y_norm[margin_j_p]
+#             y_err = (y_fit_end - y_fit_start) - (out_data_zero[-1] - out_data_zero[0])
+#             x_fit = np.arange(len(out_data_zero))
+#             d_y = x_fit * y_err / len(out_data_zero)
+#             out_data_back = y_fit_start + out_data_zero + d_y
+#             y_norm_back[margin_i:margin_j_p] = out_data_back
+#     return y_norm_back
+
+
 def isoutlier(data_y, data_y_hat, rate_threshould):
     '''
 
@@ -804,7 +1237,7 @@ def isoutlier(data_y, data_y_hat, rate_threshould):
             d_y = x_fit * y_err / len(out_data_zero)
             out_data_back = y_fit_start + out_data_zero + d_y
             y_norm_back[margin_i:margin_j_p] = out_data_back
-    return y_norm_back + data_y_hat
+    return y_norm_back
 
 
 def data_process(ydata, sensor_type, fs):
@@ -822,31 +1255,23 @@ def data_process(ydata, sensor_type, fs):
     ydata = ydata - np.nanmean(ydata)
     ydata[np.isnan(ydata)] = np.nanmean(ydata)
     if sensor_type == 1:
-        frac = np.min([int(0.1 * len(ydata)), int(14400)])
-        step = np.min([int(0.1 * len(ydata)), int(7200)])
+        frac = np.min([int(0.2 * len(ydata)), int(28800)])
+        step = np.min([int(0.01 * len(ydata)), int(2000)])
         rate_threshould = 8
-        y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
-        out_data = isoutlier(ydata, y_hat, rate_threshould) - np.nanmean(ydata[:np.min([int(0.1 * len(ydata)), int(1800)])])
-
     elif sensor_type == 2:
         frac = np.min([int(0.2 * len(ydata)), int(3600)])
         step = np.min([int(0.01 * len(ydata)), int(2000)])
         rate_threshould = 3
-        y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
-        out_data = isoutlier(ydata, y_hat, rate_threshould)
     elif sensor_type == 3:
         frac = np.min([int(0.2 * len(ydata)), int(24)])
         step = np.min([int(0.01 * len(ydata)), int(6)])
         rate_threshould = 1.5
-        y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
-        out_data = isoutlier(ydata, y_hat, rate_threshould)
     else:
         frac = np.min([int(0.2 * len(ydata)), np.floor(1800 * fs)])
         step = np.min([int(0.01 * len(ydata)), np.floor(900 * fs)])
         rate_threshould = 1
-        y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
-        out_data = isoutlier(ydata, y_hat, rate_threshould)
-
+    y_hat, w_list = rloess(np.arange(len(ydata)), ydata, frac, step, iters=4)
+    out_data = isoutlier(ydata, y_hat, rate_threshould)
     return out_data.tolist()
 
 

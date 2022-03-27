@@ -76,7 +76,10 @@ def traffic_stat(t_start_str, t_end_str):
                      "'YYYY-MM-DD HH24:MI:SS')) and (t.LANE_NO >= 4)"
     cur.execute(down_count_str)  # 执行sql语句
     down_count_rows = cur.fetchall()  # 获取数据
-    up_down_ratio = int(up_count_rows[0][0]) / int(down_count_rows[0][0])
+    if int(down_count_rows[0][0]) != 0:
+        up_down_ratio = int(up_count_rows[0][0]) / int(down_count_rows[0][0])
+    else:
+        up_down_ratio = 0
 
     # 客车流量、货车流量、客货比
     car_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
@@ -91,7 +94,10 @@ def traffic_stat(t_start_str, t_end_str):
     truck_count_rows = cur.fetchall()  # 获取数据
     car_count = int(car_count_rows[0][0])
     truck_count = int(truck_count_rows[0][0])
-    ct_ratio = car_count / truck_count
+    if truck_count != 0:
+        ct_ratio = car_count / truck_count
+    else:
+        ct_ratio = 0
 
     # 超限车辆数
     over_weight_count_str = "select count(*) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
@@ -107,7 +113,11 @@ def traffic_stat(t_start_str, t_end_str):
                      "'YYYY-MM-DD HH24:MI:SS'))"
     cur.execute(weight_max_str)  # 执行sql语句
     weight_max_rows = cur.fetchall()  # 获取数据
-    weight_max = float(weight_max_rows[0][0])
+    if weight_max_rows[0][0]:
+        weight_max = float(weight_max_rows[0][0])
+    else:
+        weight_max = 0
+
 
     # 昼日流量比
     day_num_str = "select count(ID) from T_STG_WEIGH_VALUE t where (to_date(t.evt_time, 'YYYY-MM-DD HH24:MI:SS') " \
@@ -122,7 +132,10 @@ def traffic_stat(t_start_str, t_end_str):
     cur.execute(night_num_str)  # 执行sql语句
     night_num_rows = cur.fetchall()  # 获取数据
     all_count = int(day_num_rows[0][0]) + int(night_num_rows[0][0])
-    day_flow_ratio = int(day_num_rows[0][0]) / (int(day_num_rows[0][0]) + int(night_num_rows[0][0]))
+    if int(day_num_rows[0][0]) != 0:
+        day_flow_ratio = int(day_num_rows[0][0]) / (int(day_num_rows[0][0]) + int(night_num_rows[0][0]))
+    else:
+        day_flow_ratio = 0
 
     # 高峰小时系数
     count_15 = "select " \
@@ -141,7 +154,10 @@ def traffic_stat(t_start_str, t_end_str):
                "max(count(*)) desc "
     cur.execute(count_60)  # 执行sql语句
     count_60_rows = cur.fetchall()  # 获取数据
-    peak_hour_coff = float(count_60_rows[0][0]) / float(count_15_rows[0][0]) / 4
+    if count_15_rows[0][0]:
+        peak_hour_coff = float(count_60_rows[0][0]) / float(count_15_rows[0][0]) / 4
+    else:
+        peak_hour_coff = 0
 
     db.close()
 
@@ -165,17 +181,20 @@ def process():
     np.savetxt(main_path + r"output\fig3_y_1.txt", velocity)
     np.savetxt(main_path + r"output\fig4_x_1.txt", weight_list)
     np.savetxt(main_path + r"output\fig4_y_1.txt", weight_count)
-    doc_str = "车辆荷载统计：\n" \
-              "总车流量：{0:d}辆\n" \
-              "上、下行车流量比：{1:.2f}\n" \
-              "客车流量：{2:d}辆\n" \
-              "货车流量：{3:d}辆\n" \
-              "客货比：{4:.2f}\n" \
-              "超载车辆数：{5:d}辆\n" \
-              "最重车辆：{6:.2f}t\n" \
-              "昼日流量比：{7:.2f}\n" \
-              "高峰小时系数：{8:.2f}".format(all_count, up_down_ratio, car_count, truck_count, ct_ratio,
-                                      over_weight_count, weight_max, day_flow_ratio, peak_hour_coff)
+    if weight_max != 0:
+        doc_str = "车辆荷载统计：\n" \
+                  "总车流量：{0:d}辆\n" \
+                  "上、下行车流量比：{1:.2f}\n" \
+                  "客车流量：{2:d}辆\n" \
+                  "货车流量：{3:d}辆\n" \
+                  "客货比：{4:.2f}\n" \
+                  "超载车辆数：{5:d}辆\n" \
+                  "最重车辆：{6:.2f}t\n" \
+                  "昼日流量比：{7:.2f}\n" \
+                  "高峰小时系数：{8:.2f}".format(all_count, up_down_ratio, car_count, truck_count, ct_ratio,
+                                          over_weight_count, weight_max, day_flow_ratio, peak_hour_coff)
+    else:
+        doc_str = "该时段动态承重数据暂未入库！"
     with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return
