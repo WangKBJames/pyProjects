@@ -87,7 +87,7 @@ if __name__ == "__main__":
     if True:
         from dataReader import bin_data
 
-        zd_path = r"W:\ZD\振动\\"
+        zd_path = r"W:\ZD\\"
         zd1_sensor = "ZD020116"
         zd2_sensor = "ZD020117"
         t_start_list = [2022, 2, 11, 0, 0, 0]

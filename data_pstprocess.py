@@ -356,7 +356,7 @@ def process():
 
 
 if __name__ == "__main__":
-    # import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
     # ydata = np.sin(0.0001*np.arange(72000)) + np.random.randn(72000)
 
     # np.savetxt(main_path + r"input\shuju1.txt", ydata)

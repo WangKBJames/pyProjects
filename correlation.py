@@ -172,7 +172,7 @@ def process():
     np.savetxt(main_path + r"output\fig2_x_2.txt", x_fit)
     np.savetxt(main_path + r"output\fig2_y_2.txt", y_fit)
     doc_str = "函数形式：{0:.3g}x+{1:.3g}\n" \
-              "相关系数：{2:.3f}".format(a, b, corr)
+              "相关系数：{2:.3f}".format(a, b, np.abs(corr))
     with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return
@@ -205,8 +205,8 @@ if __name__ == "__main__":
         plt.show()
         np.arange()
     if True:
-        jw_path = r"Z:\江苏控股桥群\江阴\JW\振弦"
-        wy_path = r"Z:\江苏控股桥群\江阴\WY\位移"
+        jw_path = r"Z:\江苏控股桥群\江阴\JW"
+        wy_path = r"Z:\江苏控股桥群\江阴\WY"
         jw_sensor = "JW020101"
         wy_sensor = "WY020101"
         t_start_list = [2021, 4, 1, 0, 0, 0]

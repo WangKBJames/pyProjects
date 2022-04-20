@@ -964,10 +964,10 @@ if __name__ == "__main__":
     if True:
         from dataReader import gnss_data
 
-        path = r"W:\GPSData\\"
+        path = r"W:\BD\\"
         sensor_num = "BD020102"
         t_start_list = [2022, 3, 12, 0, 0, 0]
-        t_end_list = [2022, 3, 16, 0, 0, 0]
+        t_end_list = [2022, 3, 13, 0, 0, 0]
         t_list, data = gnss_data(path, sensor_num, t_start_list, t_end_list, return_ref=[0, 1, 2], sample_frq=1)
         # nd = [i * 100 for i in data[2]]
         # nd = nd[0:3600*24*4]
