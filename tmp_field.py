@@ -18,6 +18,11 @@ def tmp_gradient(tmp_1, tmp_2, dis=5):
         tmp_1 = np.array(tmp_1, dtype='float')
     if type(tmp_2) is not np.ndarray:
         tmp_2 = np.array(tmp_2, dtype='float')
+    if len(tmp_1) != len(tmp_2):
+        if len(tmp_1) > len(tmp_2):
+            tmp_1 = tmp_1[0:len(tmp_2)]
+        else:
+            tmp_2 = tmp_2[0:len(tmp_1)]
     grad = (tmp_2 - tmp_1) / dis
     tmp_mean = (np.nanmean(tmp_1) + np.nanmean(tmp_2)) / 2
     tmp_max = np.max([np.nanmax(tmp_1), np.nanmax(tmp_2)])
@@ -41,10 +46,10 @@ def process():
 
 
 if __name__ == "__main__":
-    tmp_1 = np.random.randn(40)
-    tmp_2 = np.random.randn(40)
-    # grad, doc_str = tmp_gradient(tmp_1, tmp_2, dis=5)
-
-    np.savetxt(main_path + r"input\shuju1.txt", tmp_1)
-    np.savetxt(main_path + r"input\shuju2.txt", tmp_2)
+    # tmp_1 = np.random.randn(40)
+    # tmp_2 = np.random.randn(40)
+    # # grad, doc_str = tmp_gradient(tmp_1, tmp_2, dis=5)
+    #
+    # np.savetxt(main_path + r"input\shuju1.txt", tmp_1)
+    # np.savetxt(main_path + r"input\shuju2.txt", tmp_2)
     process()

@@ -140,9 +140,14 @@ def correlation(x_signal, y_signal):
     if type(x_signal) is not np.ndarray:
         x_signal = np.array(x_signal, dtype='float')
     x_signal[np.isnan(x_signal)] = np.nanmean(x_signal)
-    if type(x_signal) is not np.ndarray:
+    if type(y_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
     y_signal[np.isnan(y_signal)] = np.nanmean(y_signal)
+    if len(x_signal) != len(y_signal):
+        if len(x_signal) > len(y_signal):
+            x_signal = x_signal[0:len(y_signal)]
+        else:
+            y_signal = y_signal[0:len(x_signal)]
     w_init = [1.0, 1.0]
     fit_ret = leastsq(error_func, w_init, args=(x_signal, y_signal))
     a, b = fit_ret[0]
