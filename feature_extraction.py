@@ -117,8 +117,7 @@ def process():
         y_cum, y_fit, a, b, corr = cumulation(data_1, fs)
         np.savetxt(main_path + r"output\fig2_y_1.txt", y_cum)
         np.savetxt(main_path + r"output\fig2_y_2.txt", y_fit)
-        doc_str = "趋势斜率：{0:.3g}\n" \
-                  "相关系数：{1:.3f}".format(a, corr)
+        doc_str = "趋势斜率：{0:.3g}".format(a)
     with open(main_path + r"output\shuoming.txt", "w", encoding="utf-8") as f:
         f.write(doc_str)
     return

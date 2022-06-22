@@ -61,7 +61,7 @@ def process():
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
 
     if False:
         fs = 10e3
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
         np.savetxt(main_path + r"input\shuju1.txt", x)
         np.savetxt(main_path + r"input\shuju2.txt", y)
-    if True:
+    if False:
         from dataReader import bin_data
 
         zd_path = r"W:\ZD\\"
@@ -103,3 +103,4 @@ if __name__ == "__main__":
         data_2 = np.loadtxt(main_path + r"output\fig2_y_1.txt", dtype='float')
         plt.plot(data_1, data_2)
         plt.show()
+    process()

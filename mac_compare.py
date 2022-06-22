@@ -19,9 +19,11 @@ def mac_compare(mode_order, mode_select_1, mode_select_2):
     frq1 = [0.106, 0.132, 0.183, 0.197, 0.255, 0.308]
     frq2 = [0.109, 0.128, 0.178, 0.202, 0.249, 0.314]
     frq3 = [0.102, 0.137, 0.176, 0.195, 0.259, 0.318]
+    frq4 = [0.101, 0.122, 0.171, 0.209, 0.241, 0.326]
     dmp1 = [3.49, 5.18, 2.98, 4.92, 3.19, 5.11]
     dmp2 = [2.19, 3.78, 4.28, 6.14, 4.29, 4.17]
     dmp3 = [4.68, 2.68, 5.14, 3.87, 6.14, 4.65]
+    dmp4 = [3.98, 4.05, 4.67, 5.21, 6.71, 3.97]
     shape = ["竖弯反对称1", "竖弯对称1", "竖弯对称2", "竖弯反对称2", "竖弯对称3", "竖弯反对称3"]
 
     seed = int(mode_order * 1000 + mode_select_1 * 100 + mode_select_2)
@@ -37,6 +39,9 @@ def mac_compare(mode_order, mode_select_1, mode_select_2):
     elif mode_select_1 == 3:
         f1 = frq3[mode_order - 1]
         d1 = dmp3[mode_order - 1]
+    elif mode_select_1 == 4:
+        f1 = frq4[mode_order - 1]
+        d1 = dmp4[mode_order - 1]
     if mode_select_2 == 1:
         f2 = frq1[mode_order - 1]
         d2 = dmp1[mode_order - 1]
@@ -46,6 +51,9 @@ def mac_compare(mode_order, mode_select_1, mode_select_2):
     elif mode_select_2 == 3:
         f2 = frq3[mode_order - 1]
         d2 = dmp3[mode_order - 1]
+    elif mode_select_2 == 4:
+        f2 = frq4[mode_order - 1]
+        d2 = dmp4[mode_order - 1]
 
     doc_str = "时段1结构模态参数\n" \
               "振型：{0:s}\n" \

@@ -10,8 +10,8 @@ code = 'bridge_detection_jy'
 ipaddress = '58.213.45.94:2221/orcl'
 
 
-t_start_str = '2022-03-12 00:00:00'
-t_end_str = '2022-03-12 23:55:00'
+# t_start_str = '2022-03-12 00:00:00'
+# t_end_str = '2022-03-12 23:55:00'
 
 
 def traffic_stat(t_start_str, t_end_str):

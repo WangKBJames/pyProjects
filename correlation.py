@@ -122,6 +122,9 @@ def data_align(x, y, long_fit=True):
             elif not long_fit:
                 y_align = y[np.linspace(r // 2, r // 2 + (len(x) - 1) * r, len(x))]
                 x_align = x
+    else:
+        x_align = x
+        y_align = y
     return x_align, y_align
 
 
@@ -170,10 +173,10 @@ def max_corr_data(x_signal, y_signal):
 def process():
     data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
     data_2 = np.loadtxt(main_path + r"input\shuju2.txt", dtype='float')
-    data_1, data_2 = data_align(data_1, data_2, long_fit=True)
-    x_fit, y_fit, a, b, corr = correlation(data_1, data_2)
-    np.savetxt(main_path + r"output\fig2_x_1.txt", data_1)
-    np.savetxt(main_path + r"output\fig2_y_1.txt", data_2)
+    data_1_align, data_2_aliagn = data_align(data_1, data_2, long_fit=True)
+    x_fit, y_fit, a, b, corr = correlation(data_1_align, data_2_aliagn)
+    np.savetxt(main_path + r"output\fig2_x_1.txt", data_1_align)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", data_2_aliagn)
     np.savetxt(main_path + r"output\fig2_x_2.txt", x_fit)
     np.savetxt(main_path + r"output\fig2_y_2.txt", y_fit)
     doc_str = "函数形式：{0:.3g}x+{1:.3g}\n" \
@@ -184,7 +187,7 @@ def process():
 
 
 if __name__ == "__main__":
-    from dataReader import bin_data
+    # from dataReader import bin_data
 
     if False:
         x_signal = np.array([8.19, np.nan, 6.39, 8.71, 4.7, 2.66, 3.78])
@@ -209,7 +212,7 @@ if __name__ == "__main__":
         plt.plot(corrxy)
         plt.show()
         np.arange()
-    if True:
+    if False:
         jw_path = r"Z:\江苏控股桥群\江阴\JW"
         wy_path = r"Z:\江苏控股桥群\江阴\WY"
         jw_sensor = "JW020101"
@@ -235,4 +238,4 @@ if __name__ == "__main__":
         # ax3.scatter(jw, wy)
         # ax3.plot(x_fit, y_fit, 'r')
         # plt.show()
-    # process()
+    process()
