@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 from scipy.stats import pearsonr
+from correlation import correlation
 import math
 import sys
 
@@ -24,6 +25,7 @@ def spectrum(y_signal, fs):
     fft_y = np.fft.rfft(y_signal)
     n = int(len(y_signal))
     abs_fy = np.abs(fft_y) / n * 2
+    abs_fy[0] = 0.0
     freqs = np.linspace(0, fs / 2, int(n / 2 + 1))
     frqp = freqs[np.argmax(abs_fy)]
     return [freqs.tolist(), abs_fy.tolist(), float(frqp)]
@@ -66,13 +68,14 @@ def trend(y_signal, fs):
     '''
     if type(y_signal) is not np.ndarray:
         y_signal = np.array(y_signal, dtype='float')
-    y_signal = movmean(y_signal, int(60*fs))
+    # y_signal = movmean(y_signal, int(60*fs))
     dt = 1 / float(fs)
     t = np.arange(start=0.0, stop=len(y_signal) * dt, step=dt, dtype='float')
     w_init = [1.0, 1.0]
     fit_ret = leastsq(error_func, w_init, args=(t, y_signal))
     a, b = fit_ret[0]
     y_fit = hypothesis_func([a, b], t)
+
     corr = pearsonr(y_fit, y_signal)
     return [y_signal, y_fit.tolist(), float(a), float(b), float(corr[0])]
 
@@ -101,7 +104,7 @@ def process():
     par = np.loadtxt(main_path + r"input\par.txt", dtype='float')
     type_num = par[0]
     fs = par[1]
-    data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
+    data_1 = np.loadtxt(main_path + r"input\shuju.txt", dtype='float')
     if type_num == 1:
         y_movmean, y_fit, a, b, corr = trend(data_1, fs)
         np.savetxt(main_path + r"output\fig2_y_1.txt", y_movmean)
@@ -147,4 +150,13 @@ if __name__ == "__main__":
     # plt.show()
 
     # np.savetxt(main_path + r"input\shuju1.txt", y_signal)
-    process()
+    if True:
+        process()
+        data_11 = np.loadtxt(main_path + r"output\fig2_x_1.txt", dtype='float')
+        data_12 = np.loadtxt(main_path + r"output\fig2_y_1.txt", dtype='float')
+        data_22 = np.loadtxt(main_path + r"output\fig2_y_2.txt", dtype='float')
+        plt.plot(data_11, data_12, color='b', label='train set')
+        # plt.plot(data_12,  color='b', label='train set')
+        # plt.plot(data_22, color='r', label='fitting line')
+        plt.legend(loc='lower right')  # label面板放到figure的右下角
+        plt.show()

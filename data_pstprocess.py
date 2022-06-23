@@ -116,7 +116,7 @@ def extreme(ydata, fs):
     list[2]:  y_mean: float[], 均值序列， 图2 y轴，x轴为时间
     '''
 
-    win_n = int(fs * 600)
+    win_n = int(fs * 60)
     y_max = movmax(ydata, win_n)
     y_min = movmin(ydata, win_n)
     y_mean = movmean(ydata, win_n)
@@ -134,7 +134,7 @@ def data_quantile(ydata, fs):
     list[2]: 0.25 分位数序列，list[1]: y_25: float[],图2 y轴，x轴为时间
     '''
 
-    win_n = int(fs * 600)
+    win_n = int(fs * 60)
     y_75 = movquantile(ydata, win_n, 0.75)
     y_50 = movquantile(ydata, win_n, 0.5)
     y_25 = movquantile(ydata, win_n, 0.25)
@@ -149,7 +149,7 @@ def data_std(ydata, fs):
     :return:
     均方根， float[]，图2 y轴，x轴为时间
     '''
-    win_n = int(fs * 600)
+    win_n = int(fs * 60)
     y_std = movstd(ydata, win_n)
     return y_std
 
@@ -335,7 +335,7 @@ def process():
     par = np.loadtxt(main_path + r"input\par.txt", dtype='float')
     type_num = par[0]
     fs = par[1]
-    data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
+    data_1 = np.loadtxt(main_path + r"input\shuju.txt", dtype='float')
     if type_num == 1:
         y_max, y_min, y_mean = extreme(data_1, fs)
         np.savetxt(main_path + r"output\fig2_y_1.txt", y_max)

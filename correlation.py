@@ -156,6 +156,9 @@ def correlation(x_signal, y_signal):
     a, b = fit_ret[0]
     x_fit = x_signal
     y_fit = hypothesis_func([a, b], x_fit)
+    ind_x_fit = np.argsort(x_fit)
+    x_fit = np.sort(x_fit)
+    y_fit = y_fit[ind_x_fit]
     corr = pearsonr(x_signal, y_signal)
     # return x_fit.tolist(), y_fit.tolist(), np.float(a), np.float(b), np.float(corr[0])
     return [x_fit.tolist(), y_fit.tolist(), float(a), float(b), float(corr[0])]
@@ -173,10 +176,13 @@ def max_corr_data(x_signal, y_signal):
 def process():
     data_1 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
     data_2 = np.loadtxt(main_path + r"input\shuju2.txt", dtype='float')
-    data_1_align, data_2_aliagn = data_align(data_1, data_2, long_fit=True)
-    x_fit, y_fit, a, b, corr = correlation(data_1_align, data_2_aliagn)
+    data_1_align, data_2_align = data_align(data_1, data_2, long_fit=True)
+    x_fit, y_fit, a, b, corr = correlation(data_1_align, data_2_align)
+    ind_data_1 = np.argsort(data_1_align)
+    data_1_align = data_1_align[ind_data_1]
+    data_2_align = data_2_align[ind_data_1]
     np.savetxt(main_path + r"output\fig2_x_1.txt", data_1_align)
-    np.savetxt(main_path + r"output\fig2_y_1.txt", data_2_aliagn)
+    np.savetxt(main_path + r"output\fig2_y_1.txt", data_2_align)
     np.savetxt(main_path + r"output\fig2_x_2.txt", x_fit)
     np.savetxt(main_path + r"output\fig2_y_2.txt", y_fit)
     doc_str = "函数形式：{0:.3g}x+{1:.3g}\n" \
@@ -238,4 +244,21 @@ if __name__ == "__main__":
         # ax3.scatter(jw, wy)
         # ax3.plot(x_fit, y_fit, 'r')
         # plt.show()
-    process()
+    if True:
+        process()
+        data_11 = np.loadtxt(main_path + r"input\shuju1.txt", dtype='float')
+        data_12 = np.loadtxt(main_path + r"input\shuju2.txt", dtype='float')
+        print(np.min(data_11))
+        print(np.min(data_12))
+        plt.plot(data_11, color='r', label='fitting line')
+        plt.show()
+        # data_21 = np.loadtxt(main_path + r"output\fig2_x_2.txt", dtype='float')
+        # data_22 = np.loadtxt(main_path + r"output\fig2_y_2.txt", dtype='float')
+        # data_11 = np.loadtxt(main_path + r"output\fig2_x_1.txt", dtype='float')
+        # data_12 = np.loadtxt(main_path + r"output\fig2_y_1.txt", dtype='float')
+        # data_21 = np.loadtxt(main_path + r"output\fig2_x_2.txt", dtype='float')
+        # data_22 = np.loadtxt(main_path + r"output\fig2_y_2.txt", dtype='float')
+        # plt.scatter(data_11, data_12, color='b', label='train set')
+        # plt.plot(data_21, data_22, color='r', label='fitting line')
+        # plt.legend(loc='lower right')  # label面板放到figure的右下角
+        # plt.show()
